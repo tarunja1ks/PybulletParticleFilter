@@ -1,0 +1,32 @@
+---
+wheel_joints: [8, 15]
+steering_joints: [0, 2]
+force: [0, 50, 20]
+velocity: [-50, 50, 0]
+steering: [-1, 1, 0]
+car_x: 0
+car_y: 0
+lidar_configs:
+  lidar_joints: 4
+  lidar_angle1: 45
+  lidar_angle2: 135
+  num_rays: 50
+  ray_start_len: 0.25
+  ray_len: 2.0
+  hit_color: [1, 0, 0]  # Red
+  miss_color: [0, 1, 0] # Green
+camera_configs:
+  camera_joints: 5
+  camera_pos: [0.25,0,0.1] # same as car pos initially
+  camera_ori: [0,0,0]
+  camera_fov: 60
+  camera_aspect: 1.5
+  camera_near: 0.1
+  camera_far: 10
+  camera_width: 640
+  camera_height: 480
+  camera_fx: 200000
+  camera_fy: 200000
+  camera_dist: 3
+  camera_target_pos: [0,0,0]
+  camera_up_axis_index: [0,0,1]
