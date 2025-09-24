@@ -1,5 +1,5 @@
 import math
-import pybulletPF as p
+import pybullet as p
 from pynput import keyboard
 
 UP = 'up'

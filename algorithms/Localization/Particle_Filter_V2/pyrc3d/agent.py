@@ -1,5 +1,5 @@
 import numpy as np
-import pybulletPF as p
+import pybullet as p
 from utilities import utils
 
 # TODO:

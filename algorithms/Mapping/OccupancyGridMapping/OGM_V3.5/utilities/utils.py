@@ -9,7 +9,7 @@ import math
 import time
 import platform
 import numpy as np
-import pybulletPF as p
+import pybullet as p
 from collections import namedtuple
 import utilities.geometry_utils as gu
 

@@ -1,4 +1,4 @@
-import pybulletPF as p
+import pybullet as p
 import numpy as np
 
 def Point(x=0., y=0., z=0.):

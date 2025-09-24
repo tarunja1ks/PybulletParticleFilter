@@ -1,0 +1,97 @@
+# yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
+site_name: 'Robot Proving Grounds'
+site_url: https://existentialrobotics.org/RobotProvingGrounds/
+
+
+nav:
+  - Home: 'index.md'
+  - Simulation Environment: 'simulation/index.md'
+  - Algorithms:
+    - 'Mapping': 'algorithms/mapping/index.md'
+    - 'Localization': 'algorithms/localization/index.md'
+    - 'Planning': 'algorithms/planning/index.md'
+    - 'Control': 'algorithms/control/index.md'
+  - Contributors: 'contributors.md'
+theme:
+  name: material
+  favicon: images/robot_dancing.gif
+  logo: images/robot_dancing.gif
+  font:
+    text: Source Sans Pro
+    code: Source Code Pro
+  features:
+    - toc.follow
+    - toc.integrate
+    - header.autohide
+    - announce.dismiss
+    - navigation.expand
+    - navigation.tabs
+    - navigation.top
+    - navigation.tabs.sticky
+  icon:
+    admonition:
+      note: fontawesome/solid/note-sticky
+      abstract: fontawesome/solid/book
+      info: fontawesome/solid/circle-info
+      tip: fontawesome/solid/bullhorn
+      success: fontawesome/solid/check
+      question: fontawesome/solid/circle-question
+      warning: fontawesome/solid/triangle-exclamation
+      failure: fontawesome/solid/bomb
+      danger: fontawesome/solid/skull
+      bug: fontawesome/solid/robot
+      example: fontawesome/solid/flask
+      quote: fontawesome/solid/quote-left
+
+  palette:
+      scheme: light_custom
+
+markdown_extensions:
+  - footnotes
+  - meta
+  - md_in_html
+  - def_list
+  - attr_list
+  - admonition
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.tilde
+  - pymdownx.details
+  - pymdownx.betterem
+  - pymdownx.snippets
+  - pymdownx.inlinehilite
+  - pymdownx.smartsymbols
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+      options:
+        custom_icons:
+          - overrides/.icons
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      use_pygments: true
+      linenums: true
+      linenums_style: table
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.arithmatex:
+      generic: true
+
+extra_css:
+  - stylesheets/extra.css
+        
+extra_javascript:
+  - https://cdnjs.cloudflare.com/polyfill/v3/polyfill.js
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+  - javascripts/mathjax.js
+  - javascripts/mcq.js
+  - javascripts/dropdown.js
+  - javascripts/auto-margins.js

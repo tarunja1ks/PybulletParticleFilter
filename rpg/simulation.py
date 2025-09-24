@@ -3,7 +3,7 @@
 
 import random
 import numpy as np
-import pybulletPF as p
+import pybullet as p
 from utilities import utils, geometry_utils
 
 class Sim():

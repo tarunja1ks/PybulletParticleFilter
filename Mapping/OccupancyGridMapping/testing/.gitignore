@@ -1,6 +1,0 @@
-*.pyc
-.DS_Store/
-.ipynb_checkpoints/
-.vscode/
-__pycache__/
-Transfer_to_Docs

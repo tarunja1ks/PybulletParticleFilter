@@ -1,7 +1,7 @@
 import cv2
 import math
 import numpy as np
-import pybulletPF as p
+import pybullet as p
 import matplotlib.pyplot as plt
 import time
 
