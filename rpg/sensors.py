@@ -368,12 +368,15 @@ class Lidar(Sensor):
         self.END_ANGLE      = configs['lidar_angle2']
         self.NUM_RAYS       = configs['num_rays']
         self.RAY_START_LEN  = configs['ray_start_len']
-        self.RAY_LEN        = configs['ray_len']
+        self.RAY_LEN        = configs['ray_len'] 
         self.HIT_COLOR      = configs['hit_color']
         self.MISS_COLOR     = configs['miss_color']
 
         # Get the car's id.
         self.car_id = robot_id
+        
+        #putting in loop times
+        self.prev_time = time.time()
 
     def setup(self) -> None:
         """
@@ -449,6 +452,9 @@ class Lidar(Sensor):
 
         """
         num_threads = 0
+        
+        dt=time.time()-self.prev_time
+        
         rays_data = p.rayTestBatch(
                     self.ray_from, 
                     self.ray_to, 

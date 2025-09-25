@@ -2,12 +2,14 @@
 # Husky + Arm: Code to get simulator running. (Differential Drive)
 # ---------------------------------
 
+from matplotlib import pyplot as plt
 from rpg.agent import HuskyKuka
 from rpg.simulation import Sim
 from rpg.sensors import Camera, Lidar, IMU
 from algorithms.Control.Controller import KeyboardController
 from utilities.timings import Timings
-
+from OGM import OGM
+import numpy as np
 # Declare user-specific paths to files.
 ENV_PATH = "src/configs/env/simple_env.yaml"
 HUSKY_PATH = "src/configs/husky_kuka/husky_kuka_config.yaml"
@@ -51,38 +53,59 @@ if __name__ == "__main__":
     print_frequency = Timings(PRINT_FPS)
 
     pose = None # Car's state (in this case, it's the car's pose)
+    
+    # creating matplotlib map for the ogm
+    ogm=OGM()
+    ogm.showPlots()
         
     while True:
-        pose = husky_kuka.get_state(to_array=False, radian=False)
-        x, y, yaw = pose
+        try:
+            pose = husky_kuka.get_state(to_array=False, radian=False)
+            x, y, yaw = pose
 
-        ## ... Algorithm Inserted Here (e.g. PID Control) ... ##
-
-        rays_data, dists, coords = husky_kuka.get_sensor_data("lidar")
-        print(dists.shape,rays_data.shape,rays_data[0])
-        husky_kuka.simulate_sensor("lidar", rays_data)
-
-        imu_data = husky_kuka.get_sensor_data("imu")
-        imu_lin_accel, imu_ang_vel = imu_data["linear_acceleration"], imu_data["angular_velocity"]
-        
-        
-        
-        
-        
-        
-        # Print x,y,z lin acceleration rounded to 2 dp
-        # print(f"Linear Acceleration: {imu_lin_accel[0]:.2f}, {imu_lin_accel[1]:.2f}, {imu_lin_accel[2]:.2f}")
-
-        if print_frequency.update_time():
-            pass # debugging statements
-
-        if ctrl_time.update_time():
-            v, s, arm_angles = controller.navigate(x, y, yaw) 
+            ## ... Algorithm Inserted Here (e.g. PID Control) ... ##
             
-            # Control the robotic arm
-            husky_kuka.control_arm_forward(arm_angles)    
-           
-            husky_kuka.act(v, s) 
             
-            sim.step()
-            sim.view(x,y, yaw, "distant")
+            rays_data, dists, coords = husky_kuka.get_sensor_data("lidar")
+            
+            husky_kuka.simulate_sensor("lidar", rays_data)
+
+            imu_data = husky_kuka.get_sensor_data("imu")
+            
+            imu_lin_accel, imu_ang_vel = imu_data["linear_acceleration"], imu_data["angular_velocity"]
+
+            try:
+                ogm.bressenham_mark_Cells(np.array(dists), np.array([x,y,yaw]))
+
+                
+            except Exception as e:
+                print("broken ", e)
+                break
+            
+            
+            # Print x,y,z lin acceleration rounded to 2 dp
+            # print(f"Linear Acceleration: {imu_lin_accel[0]:.2f}, {imu_lin_accel[1]:.2f}, {imu_lin_accel[2]:.2f}")
+
+            if print_frequency.update_time():
+                pass # debugging statements
+
+            if ctrl_time.update_time():
+                v, s, arm_angles = controller.navigate(x, y, yaw) 
+                
+                # Control the robotic arm
+                husky_kuka.control_arm_forward(arm_angles)    
+            
+                husky_kuka.act(v, s) 
+                
+                sim.step()
+                sim.view(x,y, yaw, "distant")
+        except KeyboardInterrupt:
+            print("\n[INFO] Ctrl+C detected, stopping simulation...")
+            break
+            
+    print("-"*100)
+    ogm.updatePlot()
+    print("updated the plot properly")
+    ogm.showPlots()  # block here so window stays open
+    plt.pause(100000)
+    print("here")
