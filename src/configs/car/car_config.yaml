@@ -10,8 +10,8 @@ lidar_configs:
   lidar_joints: 4
   lidar_angle1: 45
   lidar_angle2: 135
-  num_rays: 50
-  ray_start_len: 0.25
+  num_rays: 100
+  ray_start_len: 0
   ray_len: 8
   hit_color: [1, 0, 0]  # Red
   miss_color: [0, 1, 0] # Green

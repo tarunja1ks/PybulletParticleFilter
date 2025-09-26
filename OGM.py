@@ -39,8 +39,8 @@ class OGM:
         
         self.lidar_angle_min= -45
         self.lidar_angle_max= 45
-        self.lidar_angle_increment= (135-45)/180
-        self.lidar_range_min= 0.25 # minimum range value [m]
+        self.lidar_angle_increment= (135-45)/100
+        self.lidar_range_min= 0.0 # minimum range value [m]
         self.lidar_range_max= 8 # maximum range value [m]
         
    
@@ -202,10 +202,10 @@ class OGM:
         
         rot=np.array([[c,-s],[s,c]])
         
-        
-        world = np.dot(rot, np.vstack([xs,ys])) + (robot_pose[:2] + np.array([self.sensor_x_r, self.sensor_y_r]))[:,None]
+        print(ranges)
+        world = np.dot(rot, np.vstack([xs,ys])) + (robot_pose[:2])[:,None]
 
-        sensor_cell=self.meter_to_cell(robot_pose[:2]+np.array([self.sensor_x_r,self.sensor_y_r]))
+        sensor_cell=self.meter_to_cell(robot_pose[:2])
         x_cell,y_cell=self.vector_meter_to_cell(world)  # this is convering all the hit points into grid coordinates instead of real-world
         
         sx=np.repeat(sensor_cell[0], len(ranges))
@@ -230,10 +230,10 @@ class OGM:
         xs2=Occupied*np.cos(angles2)
         ys2=Occupied*np.sin(angles2)
         
-        world2 = np.dot(rot, np.vstack([xs2,ys2])) + (robot_pose[:2] + np.array([self.sensor_x_r, self.sensor_y_r]))[:,None]
+        world2 = np.dot(rot, np.vstack([xs2,ys2])) + (robot_pose[:2])[:,None]
         x_cell2,y_cell2=self.vector_meter_to_cell(world2)
         
-        self.ogm_plot_vectorized(x_cell2,y_cell2,True)
+        # self.ogm_plot_vectorized(x_cell2,y_cell2,True)
     
     
 
