@@ -37,9 +37,9 @@ class OGM:
         self.sensor_y_r= 0.0
         self.sensor_yaw_r= 0.0
         
-        self.lidar_angle_min= 45
-        self.lidar_angle_max= 135
-        self.lidar_angle_increment= (135-45)/50
+        self.lidar_angle_min= -45
+        self.lidar_angle_max= 45
+        self.lidar_angle_increment= (135-45)/180
         self.lidar_range_min= 0.25 # minimum range value [m]
         self.lidar_range_max= 8 # maximum range value [m]
         
@@ -189,24 +189,28 @@ class OGM:
         
         
         angles=np.arange(self.lidar_angle_min, self.lidar_angle_max,self.lidar_angle_increment)*np.pi/180
+
         valid=(scan>=self.lidar_range_min)&(scan<=self.lidar_range_max)
         ranges=scan[valid]
         angles=angles[valid]
         xs=ranges*np.cos(angles)
         ys=ranges*np.sin(angles)
+        
+        robot_pose[2]=robot_pose[2]*np.pi/180
+        
         c,s=np.cos(robot_pose[2]),np.sin(robot_pose[2])
         
         rot=np.array([[c,-s],[s,c]])
         
-        world=np.dot(rot,np.vstack([xs,ys]))+ (robot_pose[:2]+np.array([self.sensor_x_r,self.sensor_y_r]))[:,None] 
         
+        world = np.dot(rot, np.vstack([xs,ys])) + (robot_pose[:2] + np.array([self.sensor_x_r, self.sensor_y_r]))[:,None]
 
         sensor_cell=self.meter_to_cell(robot_pose[:2]+np.array([self.sensor_x_r,self.sensor_y_r]))
-        
         x_cell,y_cell=self.vector_meter_to_cell(world)  # this is convering all the hit points into grid coordinates instead of real-world
         
         sx=np.repeat(sensor_cell[0], len(ranges))
         sy=np.repeat(sensor_cell[1],len(ranges))
+        
         
         
         line_x,line_y=util.bresenham2D_vectorized(sx,sy,x_cell,y_cell)
@@ -214,8 +218,22 @@ class OGM:
         
         self.ogm_plot_vectorized(np.array(line_x,dtype=int),np.array(line_y,dtype=int),False)
         
-        world[0],world[1]=self.vector_meter_to_cell(world)
-        self.ogm_plot_vectorized(np.array(world[0],dtype=int),np.array(world[1],dtype=int),True)
+
+        validOcc=(scan>=self.lidar_range_min)&(scan<self.lidar_range_max)
+        num_valid = np.count_nonzero(validOcc)   
+        if num_valid == 0:
+            return
+        
+        Occupied=scan[validOcc]
+        angles2=np.arange(self.lidar_angle_min, self.lidar_angle_max,self.lidar_angle_increment)*np.pi/180
+        angles2=angles2[validOcc]
+        xs2=Occupied*np.cos(angles2)
+        ys2=Occupied*np.sin(angles2)
+        
+        world2 = np.dot(rot, np.vstack([xs2,ys2])) + (robot_pose[:2] + np.array([self.sensor_x_r, self.sensor_y_r]))[:,None]
+        x_cell2,y_cell2=self.vector_meter_to_cell(world2)
+        
+        self.ogm_plot_vectorized(x_cell2,y_cell2,True)
     
     
 

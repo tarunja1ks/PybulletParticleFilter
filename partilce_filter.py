@@ -73,14 +73,10 @@ if __name__ == "__main__":
             imu_data = husky_kuka.get_sensor_data("imu")
             
             imu_lin_accel, imu_ang_vel = imu_data["linear_acceleration"], imu_data["angular_velocity"]
-
-            try:
-                ogm.bressenham_mark_Cells(np.array(dists), np.array([x,y,yaw]))
+            
+            ogm.bressenham_mark_Cells(np.array(dists), np.array([x,y,yaw]))
 
                 
-            except Exception as e:
-                print("broken ", e)
-                break
             
             
             # Print x,y,z lin acceleration rounded to 2 dp
