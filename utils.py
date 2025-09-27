@@ -97,6 +97,8 @@ class utils:
       else:
         y = sy - np.cumsum(q)
     return np.vstack((x,y))
+  
+  
   def bresenham2D_vectorized(sx, sy, ex, ey):
       """
       Vectorized 2D Bresenham ray tracing returning all free cells (excluding endpoint),
@@ -114,6 +116,7 @@ class utils:
       sy = np.asarray(sy)
       ex = np.asarray(ex)
       ey = np.asarray(ey)
+      
       num_rays = len(sx)
       dx = ex - sx
       dy = ey - sy

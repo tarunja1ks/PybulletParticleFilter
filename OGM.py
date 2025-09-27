@@ -201,7 +201,15 @@ class OGM:
         
         sx,sy=self.meter_to_cell(np.array([sensor_pose[0], sensor_pose[1]]))
         
-        # self.ogm_plot(sx, sy, True)
+        sx=np.repeat(sx, len(self.angles))
+        sy=np.repeat(sy,len(self.angles))
+        
+        
+        xcells,ycells=util.bresenham2D_vectorized(sx,sy,ex,ey)
+        
+        
+        self.ogm_plot_vectorized(xcells, ycells, False)
+        
         
         self.ogm_plot_vectorized(ex, ey, True)
         
