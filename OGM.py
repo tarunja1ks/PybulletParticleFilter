@@ -115,8 +115,7 @@ class OGM:
         x= pose_vector[0]
         
         y= pose_vector[1]
-        
-        
+    
         # Check and expand map if necessary
         self.check_and_expand_map(x, y)
 
@@ -191,18 +190,18 @@ class OGM:
             self.sensor_yaw_r
         ])
         
-        occInd=(scan >= self.lidar_range_min)&(scan < self.lidar_range_max)
+        freeInd=(scan >= self.lidar_range_min)&(scan <= self.lidar_range_max)
         
-        world_angles=self.angles[occInd]-sensor_pose[2]+np.pi
-        ex=np.cos(world_angles)*scan[occInd]+sensor_pose[0]
-        ey=np.sin(world_angles)*scan[occInd]+sensor_pose[1]
+        world_angles=self.angles[freeInd]-sensor_pose[2]+np.pi
+        ex=np.cos(world_angles)*scan[freeInd]+sensor_pose[0]
+        ey=np.sin(world_angles)*scan[freeInd]+sensor_pose[1]
         
         ex,ey=self.vector_meter_to_cell(np.array([ex, ey]))  
         
         sx,sy=self.meter_to_cell(np.array([sensor_pose[0], sensor_pose[1]]))
         
-        sx=np.repeat(sx, len(self.angles))
-        sy=np.repeat(sy,len(self.angles))
+        sx=np.repeat(sx, np.sum(freeInd))
+        sy=np.repeat(sy,np.sum(freeInd))
         
         
         xcells,ycells=util.bresenham2D_vectorized(sx,sy,ex,ey)
@@ -211,7 +210,13 @@ class OGM:
         self.ogm_plot_vectorized(xcells, ycells, False)
         
         
-        self.ogm_plot_vectorized(ex, ey, True)
+        occInd=(scan >= self.lidar_range_min)&(scan <= self.lidar_range_max)
+        if(len(occInd)>0):
+            world_angles=self.angles[occInd]-sensor_pose[2]+np.pi
+            ex=np.cos(world_angles)*scan[occInd]+sensor_pose[0]
+            ey=np.sin(world_angles)*scan[occInd]+sensor_pose[1]
+            ex,ey=self.vector_meter_to_cell(np.array([ex, ey]))  
+            self.ogm_plot_vectorized(ex, ey, True)
         
         
         

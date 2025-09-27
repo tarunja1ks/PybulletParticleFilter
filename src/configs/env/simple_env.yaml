@@ -1,11 +1,11 @@
 ---
  custom: false
  wall_w: 0.75 # width of side walls.
- floor_s: 50 # Creates a x by x floor, where x := floor_s
+ floor_s: 10 # Creates a x by x floor, where x := floor_s
  floor_h: 0.001 # Height of floor.
  n_obs: 5 # No. of obstacles.
  obs_h: 0.75 # Height of obstacles.
- obs_w: 1.0 # Width of obstacles.
+ obs_w: 0.5 # Width of obstacles.
  goal_w: 0.4 # Width of goal.
  goal_h: 0.50 # Height of goal
  goal_loc: null # Randomly placed if `null`
