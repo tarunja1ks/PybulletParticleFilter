@@ -183,26 +183,27 @@ class OGM:
         return math.log(probability/(1-probability))
     
     def bressenham_mark_Cells(self, scan, robot_pose):
-        sensor_pose = robot_pose + np.array([np.cos(robot_pose[2])*self.sensor_x_r - np.sin(robot_pose[2])*self.sensor_y_r, np.sin(robot_pose[2])*self.sensor_x_r + np.cos(robot_pose[2])*self.sensor_y_r, self.sensor_yaw_r])
-
-        
-
-        np.sin(robot_pose[2])*self.sensor_x_r + np.cos(robot_pose[2])*self.sensor_y_r
-        
-        occInd=(scan >= self.lidar_range_min) & (scan < self.lidar_range_max)
-        
-        ex=np.cos(self.angles[occInd])*scan[occInd]+sensor_pose[0]
-        ey=np.sin(self.angles[occInd])*scan[occInd]+sensor_pose[1]
-        
-        ex,ey=self.vector_meter_to_cell(np.array([ex,ey]))
         
         
-        sx,sy=self.meter_to_cell(np.array([sensor_pose[0],sensor_pose[1]]))
-        self.ogm_plot(sx,sy,True)
+        sensor_pose=robot_pose+np.array([
+            np.cos(robot_pose[2])*self.sensor_x_r - np.sin(robot_pose[2])*self.sensor_y_r, 
+            np.sin(robot_pose[2])*self.sensor_x_r + np.cos(robot_pose[2])*self.sensor_y_r, 
+            self.sensor_yaw_r
+        ])
         
+        occInd=(scan >= self.lidar_range_min)&(scan < self.lidar_range_max)
         
-        self.ogm_plot_vectorized(ex,ey,True)
+        world_angles=self.angles[occInd]-sensor_pose[2]+np.pi
+        ex=np.cos(world_angles)*scan[occInd]+sensor_pose[0]
+        ey=np.sin(world_angles)*scan[occInd]+sensor_pose[1]
         
+        ex,ey=self.vector_meter_to_cell(np.array([ex, ey]))  
+        
+        sx,sy=self.meter_to_cell(np.array([sensor_pose[0], sensor_pose[1]]))
+        
+        # self.ogm_plot(sx, sy, True)
+        
+        self.ogm_plot_vectorized(ex, ey, True)
         
         
         

@@ -67,6 +67,7 @@ if __name__ == "__main__":
         try:
             pose = car.get_state(to_array=False,radian=True)
             x, y, yaw = pose
+            y=-y
 
             ## ... Algorithm Inserted Here (e.g. PID Control) ... ##
 
@@ -85,7 +86,7 @@ if __name__ == "__main__":
             if print_frequency.update_time():
                 robot_pose=np.array([x,y,yaw])
                 sensor_pose = robot_pose + np.array([np.cos(robot_pose[2])*0.265 - np.sin(robot_pose[2])*0, np.sin(robot_pose[2])*0.265 + np.cos(robot_pose[2])*0, -math.pi/2])
-                print(sensor_pose[1:])
+                print(sensor_pose)
                 pass # debugging statements
 
             if ctrl_time.update_time():
@@ -94,7 +95,7 @@ if __name__ == "__main__":
                 car.act(v, s)
                 
                 sim.step() # Advance one time step in the sim
-                sim.view(x,y, yaw, "distant")
+                sim.view(x,-y, yaw, "distant")
         except KeyboardInterrupt:
             print("\n[INFO] Ctrl+C detected, stopping simulation...")
             break
