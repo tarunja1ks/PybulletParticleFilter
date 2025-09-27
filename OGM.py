@@ -7,6 +7,7 @@ import time
 from fractions import Fraction
 from utilities.Pose import Pose
 import math
+import cv2
 matplotlib.use('Qt5Agg')
 
 class OGM: 
@@ -25,10 +26,10 @@ class OGM:
         
         self.red_dot_markers = [] 
         
-        fig2= plt.figure(figsize=(10, 10))
+        # fig2= plt.figure(figsize=(10, 10))
         extent= [self.MAP['ymin'], self.MAP['ymax'], self.MAP['xmin'], self.MAP['xmax']]
-        self.ogm_map= plt.imshow(self.MAP['map'], cmap="gray", vmin=-5, vmax=5, 
-                                 origin='lower', extent=extent)
+        # self.ogm_map= plt.imshow(self.MAP['map'], cmap="gray", vmin=-5, vmax=5, 
+        #                          origin='lower', extent=extent)
 
         
         
@@ -130,7 +131,18 @@ class OGM:
        
         return cell_x, cell_y
     
-    
+    def show_cv2(self, scale=3):
+        """Show the OGM using OpenCV instead of matplotlib (faster)."""
+        # Convert log-odds to a displayable image (0=free, 255=occupied)
+        prob = 1 / (1 + np.exp(-self.MAP['map']))  # logistic
+        img = (prob * 255).astype(np.uint8)
+
+        # Optional: resize for visibility
+        img_resized = cv2.resize(img, (self.MAP['sizey']*scale, self.MAP['sizex']*scale),
+                                 interpolation=cv2.INTER_NEAREST)
+
+        cv2.imshow("Occupancy Grid Map", img_resized)
+        cv2.waitKey(1)  # non-blocking
     
     def plot_red_dot(self, cell_x, cell_y):
         # Convert cell coordinates back to world coordinates
@@ -207,11 +219,12 @@ class OGM:
         xcells,ycells=util.bresenham2D_vectorized(sx,sy,ex,ey)
         
         
-        self.ogm_plot_vectorized(xcells, ycells, False)
+        self.ogm_plot_vectorized(xcells[:-1], ycells[:-1], False)
         
         
-        occInd=(scan >= self.lidar_range_min)&(scan <= self.lidar_range_max)
-        if(len(occInd)>0):
+        occInd=(scan >= self.lidar_range_min)&(scan < self.lidar_range_max)
+
+        if(np.sum(occInd)>0):
             world_angles=self.angles[occInd]-sensor_pose[2]+np.pi
             ex=np.cos(world_angles)*scan[occInd]+sensor_pose[0]
             ey=np.sin(world_angles)*scan[occInd]+sensor_pose[1]

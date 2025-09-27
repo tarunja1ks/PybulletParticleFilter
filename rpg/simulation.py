@@ -139,7 +139,7 @@ class Sim():
                 lineWidth=12
             )
 
-    def view(self, x, y, yaw, type="top"):
+    def view(self, x, y, yaw, type="car"):
         """
         Set the view of the simulation environment.
 
@@ -182,12 +182,12 @@ class Sim():
         """
         # The camera is at 0.25, 0, 0.1 relative to the car.
         # Find camera position relative to the world.
-        camera_world_x = x + 0.25 * np.cos(np.radians(yaw))
-        camera_world_y = y + 0.25 * np.sin(np.radians(yaw))
+        camera_world_x = x + 0.25 * np.cos(yaw)
+        camera_world_y = y + 0.25 * np.sin(yaw)
         camera_world_z = 0.1
 
         camera_distance = 0.001
-        camera_yaw = yaw - 90
+        camera_yaw = np.degrees(yaw) - 90
         camera_pitch = 0
         camera_target_position = (camera_world_x, camera_world_y, camera_world_z)
         p.resetDebugVisualizerCamera(camera_distance, camera_yaw, camera_pitch, camera_target_position)

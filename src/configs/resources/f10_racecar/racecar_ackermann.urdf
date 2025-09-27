@@ -33,7 +33,7 @@
   <!-- Add the left rear wheel with its joints and tranmissions -->
   <link name="left_rear_wheel">
     <contact>
-      <lateral_friction value=".9"/>
+      <lateral_friction value="1.5"/>
       <rolling_friction value="0.0"/>
       <stiffness value="30000"/>
       <damping value="1000"/>
@@ -66,7 +66,7 @@
   <!-- Add the right rear wheel with its joints and tranmissions -->
   <link name="right_rear_wheel">
 <contact>
-      <lateral_friction value=".9"/>
+      <lateral_friction value="1.5"/>
       <rolling_friction value="0.0"/>
       <stiffness value="30000"/>
       <damping value="1000"/>
@@ -163,7 +163,7 @@
   <!-- Add the left front wheel with its joints and tranmissions -->
   <link name="left_front_wheel">
 <contact>
-      <lateral_friction value=".8"/>
+      <lateral_friction value="1.5"/>
       <rolling_friction value="0.0"/>
       <stiffness value="30000"/>
       <damping value="1000"/>
@@ -207,7 +207,7 @@
   <!-- Add the left front wheel with its joints and tranmissions -->
   <link name="right_front_wheel">
 <contact>
-      <lateral_friction value="0.8"/>
+      <lateral_friction value="1.5"/>
       <rolling_friction value="0.0"/>
       <stiffness value="30000"/>
       <damping value="1000"/>

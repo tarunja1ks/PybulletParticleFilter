@@ -62,7 +62,8 @@ if __name__ == "__main__":
     
     
     ogm=OGM()
-    ogm.showPlots()
+    
+    simdex=0
     while True:
         try:
             pose = car.get_state(to_array=False,radian=True)
@@ -87,21 +88,19 @@ if __name__ == "__main__":
                 robot_pose=np.array([x,y,yaw])
                 sensor_pose = robot_pose + np.array([np.cos(robot_pose[2])*0.265 - np.sin(robot_pose[2])*0, np.sin(robot_pose[2])*0.265 + np.cos(robot_pose[2])*0, -math.pi/2])
                 pass # debugging statements
-
+            if(simdex%40==0):
+                ogm.show_cv2()
+            simdex+=1
             if ctrl_time.update_time():
                 v, s = controller.navigate(x, y, yaw)    
             
                 car.act(v, s)
                 
                 sim.step() # Advance one time step in the sim
-                sim.view(x,-y, yaw, "distant")
+                sim.view(x,-y, yaw, "car")
         except KeyboardInterrupt:
             print("\n[INFO] Ctrl+C detected, stopping simulation...")
             break
             
     print("-"*100)
-    ogm.updatePlot()
     print("updated the plot properly")
-    ogm.showPlots()  # block here so window stays open
-    plt.pause(100000)
-    print("here")
