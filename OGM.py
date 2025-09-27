@@ -6,7 +6,6 @@ from mpl_toolkits.mplot3d import Axes3D
 import time
 from fractions import Fraction
 from utilities.Pose import Pose
-
 import math
 matplotlib.use('Qt5Agg')
 
@@ -33,17 +32,16 @@ class OGM:
 
         
         
-        self.sensor_x_r= 0.30183  
+        self.sensor_x_r= 0.265
         self.sensor_y_r= 0.0
-        self.sensor_yaw_r= 0.0
+        self.sensor_yaw_r= -math.pi/2
         
-        self.lidar_angle_min= -45
-        self.lidar_angle_max= 45
+        self.lidar_angle_min= 45
+        self.lidar_angle_max= 135
         self.lidar_angle_increment= (135-45)/100
         self.lidar_range_min= 0.0 # minimum range value [m]
         self.lidar_range_max= 8 # maximum range value [m]
-        
-   
+        self.angles=np.arange(self.lidar_angle_min, self.lidar_angle_max,self.lidar_angle_increment)*np.pi/180
             
     def check_and_expand_map(self, x_world, y_world):
         """Check if coordinates are outside map bounds and expand if necessary"""
@@ -90,7 +88,6 @@ class OGM:
             self.MAP['sizey']= new_sizey
             self.MAP['map']= new_map
             expanded= True
-            print("just expanded")
             
         return expanded
             
@@ -186,55 +183,32 @@ class OGM:
         return math.log(probability/(1-probability))
     
     def bressenham_mark_Cells(self, scan, robot_pose):
-        
-        
-        angles=np.arange(self.lidar_angle_min, self.lidar_angle_max,self.lidar_angle_increment)*np.pi/180
-
-        valid=(scan>=self.lidar_range_min)&(scan<=self.lidar_range_max)
-        ranges=scan[valid]
-        angles=angles[valid]
-        xs=ranges*np.cos(angles)
-        ys=ranges*np.sin(angles)
-        
-        robot_pose[2]=robot_pose[2]*np.pi/180
-        
-        c,s=np.cos(robot_pose[2]),np.sin(robot_pose[2])
-        
-        rot=np.array([[c,-s],[s,c]])
-        
-        print(ranges)
-        world = np.dot(rot, np.vstack([xs,ys])) + (robot_pose[:2])[:,None]
-
-        sensor_cell=self.meter_to_cell(robot_pose[:2])
-        x_cell,y_cell=self.vector_meter_to_cell(world)  # this is convering all the hit points into grid coordinates instead of real-world
-        
-        sx=np.repeat(sensor_cell[0], len(ranges))
-        sy=np.repeat(sensor_cell[1],len(ranges))
-        
-        
-        
-        line_x,line_y=util.bresenham2D_vectorized(sx,sy,x_cell,y_cell)
+        sensor_pose = robot_pose + np.array([np.cos(robot_pose[2])*self.sensor_x_r - np.sin(robot_pose[2])*self.sensor_y_r, np.sin(robot_pose[2])*self.sensor_x_r + np.cos(robot_pose[2])*self.sensor_y_r, self.sensor_yaw_r])
 
         
-        self.ogm_plot_vectorized(np.array(line_x,dtype=int),np.array(line_y,dtype=int),False)
+
+        np.sin(robot_pose[2])*self.sensor_x_r + np.cos(robot_pose[2])*self.sensor_y_r
+        
+        occInd=(scan >= self.lidar_range_min) & (scan < self.lidar_range_max)
+        
+        ex=np.cos(self.angles[occInd])*scan[occInd]+sensor_pose[0]
+        ey=np.sin(self.angles[occInd])*scan[occInd]+sensor_pose[1]
+        
+        ex,ey=self.vector_meter_to_cell(np.array([ex,ey]))
+        
+        
+        sx,sy=self.meter_to_cell(np.array([sensor_pose[0],sensor_pose[1]]))
+        self.ogm_plot(sx,sy,True)
+        
+        
+        self.ogm_plot_vectorized(ex,ey,True)
+        
+        
+        
         
 
-        validOcc=(scan>=self.lidar_range_min)&(scan<self.lidar_range_max)
-        num_valid = np.count_nonzero(validOcc)   
-        if num_valid == 0:
-            return
-        
-        Occupied=scan[validOcc]
-        angles2=np.arange(self.lidar_angle_min, self.lidar_angle_max,self.lidar_angle_increment)*np.pi/180
-        angles2=angles2[validOcc]
-        xs2=Occupied*np.cos(angles2)
-        ys2=Occupied*np.sin(angles2)
-        
-        world2 = np.dot(rot, np.vstack([xs2,ys2])) + (robot_pose[:2])[:,None]
-        x_cell2,y_cell2=self.vector_meter_to_cell(world2)
-        
-        # self.ogm_plot_vectorized(x_cell2,y_cell2,True)
-    
+            
+
     
 
     def showPlots(self):
@@ -243,22 +217,84 @@ class OGM:
     # def mapCorrelation(): # making it again to understand it more 
         
     def updatePlot(self, robot_pose=None):
-        current_extent = [self.MAP['ymin'], self.MAP['ymax'], self.MAP['xmin'], self.MAP['xmax']]
+        # Check if map was expanded and recreate imshow if needed
+        current_extent= [self.MAP['ymin'], self.MAP['ymax'], self.MAP['xmin'], self.MAP['xmax']]
         
-        # Update data directly
-        self.ogm_map.set_data(self.MAP['map'])
-        self.ogm_map.set_extent(current_extent)
+        try:
+            # Try to update existing plot
+            self.ogm_map.set_data(self.MAP['map'])
+            self.ogm_map.set_extent(current_extent)
+        except:
+            # If map size changed, recreate the plot
+            plt.clf()  # Clear the figure
+            self.ogm_map= plt.imshow(self.MAP['map'], cmap="gray", vmin=-5, vmax=5, 
+                                     origin='lower', extent=current_extent)
+            plt.title("OGM graph")
+            plt.xlabel("Y [meters]")
+            plt.ylabel("X [meters]")
+            plt.colorbar(label="Log-odds")
+            plt.grid(True, alpha=0.3)
+            
+            # Recreate robot marker
+            self.robot_marker= plt.plot(0, 0, 'ro', markersize=8, label='Robot')[0]
+            plt.legend()
         
+        # Update robot position if provided
         if robot_pose is not None:
-            pose_vec = robot_pose.getPoseVector()
-            self.robot_marker.set_data([pose_vec[1]], [pose_vec[0]])
+            pose_vec= robot_pose.getPoseVector()
+            self.robot_marker.set_data([pose_vec[1]], [pose_vec[0]])  # Note: x,y swapped for display
+        
+        # Update axis limits to show full map
+        plt.xlim(self.MAP['ymin'], self.MAP['ymax'])
+        plt.ylim(self.MAP['xmin'], self.MAP['xmax'])
+        
+        plt.pause(0.05)
         
         
-        plt.pause(0.1)
-        print("updddddddate plot")
+        
         
 
+        
+       
+
+    def showPlots(self):
+        plt.show()
     
+    # def mapCorrelation(): # making it again to understand it more 
+        
+    def updatePlot(self, robot_pose=None):
+        # Check if map was expanded and recreate imshow if needed
+        current_extent= [self.MAP['ymin'], self.MAP['ymax'], self.MAP['xmin'], self.MAP['xmax']]
+        
+        try:
+            # Try to update existing plot
+            self.ogm_map.set_data(self.MAP['map'])
+            self.ogm_map.set_extent(current_extent)
+        except:
+            # If map size changed, recreate the plot
+            plt.clf()  # Clear the figure
+            self.ogm_map= plt.imshow(self.MAP['map'], cmap="gray", vmin=-5, vmax=5, 
+                                     origin='lower', extent=current_extent)
+            plt.title("OGM graph")
+            plt.xlabel("Y [meters]")
+            plt.ylabel("X [meters]")
+            plt.colorbar(label="Log-odds")
+            plt.grid(True, alpha=0.3)
+            
+            # Recreate robot marker
+            self.robot_marker= plt.plot(0, 0, 'ro', markersize=8, label='Robot')[0]
+            plt.legend()
+        
+        # Update robot position if provided
+        if robot_pose is not None:
+            pose_vec= robot_pose.getPoseVector()
+            self.robot_marker.set_data([pose_vec[1]], [pose_vec[0]])  # Note: x,y swapped for display
+        
+        # Update axis limits to show full map
+        plt.xlim(self.MAP['ymin'], self.MAP['ymax'])
+        plt.ylim(self.MAP['xmin'], self.MAP['xmax'])
+        
+        plt.pause(0.05)
         
         
 class Trajectory:

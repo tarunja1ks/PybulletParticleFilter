@@ -10,7 +10,8 @@ from algorithms.Control.Controller import KeyboardController
 from utilities.timings import Timings
 from OGM import OGM
 import numpy as np
-
+import pybullet as p
+import math
 # Declare user-specific paths to files.
 ENV_PATH = "src/configs/env/simple_env.yaml"
 CAR_PATH = "src/configs/car/car_config.yaml"
@@ -20,7 +21,7 @@ CAR_URDF_PATH = "src/configs/resources/f10_racecar/racecar_ackermann.urdf"
 CTRL_FPS = 100 # Perform control at 100Hz
 LIDAR_FPS = 30 # Simulate lidar at 30Hz
 CAMERA_FPS = 30 # Simulate camera at 30Hz
-PRINT_FPS = 0.2 # Print `dist` every 5 seconds for debugging
+PRINT_FPS = 4 # Print `dist` every 5 seconds for debugging
 
 # Declare sensors.
 SENSORS = [Camera, Lidar, IMU]
@@ -50,12 +51,21 @@ if __name__ == "__main__":
 
     pose = None # Car's state (in this case, it's the car's pose)
     
-    # creating matplotlib map for the ogm
+    # creating matplotlib map for the og    
+
+        
+    
+    
+    
+    
+    
+    
+    
     ogm=OGM()
     ogm.showPlots()
     while True:
         try:
-            pose = car.get_state(to_array=False,radian=False)
+            pose = car.get_state(to_array=False,radian=True)
             x, y, yaw = pose
 
             ## ... Algorithm Inserted Here (e.g. PID Control) ... ##
@@ -67,9 +77,15 @@ if __name__ == "__main__":
             imu_lin_accel = imu_data["linear_acceleration"]
             imu_ang_vel = imu_data["angular_velocity"]
             
-            ogm.bressenham_mark_Cells(np.array(dists), np.array([x,y,-yaw]))
+            ogm.bressenham_mark_Cells(np.array(dists), np.array([x,y,yaw]))
+            # x2,y2=ogm.meter_to_cell(np.array([x,y]))
+            # ogm.ogm_plot(x2,y2,True)
+            
 
             if print_frequency.update_time():
+                robot_pose=np.array([x,y,yaw])
+                sensor_pose = robot_pose + np.array([np.cos(robot_pose[2])*0.265 - np.sin(robot_pose[2])*0, np.sin(robot_pose[2])*0.265 + np.cos(robot_pose[2])*0, -math.pi/2])
+                print(sensor_pose[1:])
                 pass # debugging statements
 
             if ctrl_time.update_time():
