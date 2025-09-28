@@ -97,7 +97,7 @@ if __name__ == "__main__":
                 car.act(v, s)
                 
                 sim.step() # Advance one time step in the sim
-                sim.view(x,-y, yaw, "car")
+                sim.view(x,-y, yaw, "distant")
         except KeyboardInterrupt:
             print("\n[INFO] Ctrl+C detected, stopping simulation...")
             break

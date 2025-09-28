@@ -400,48 +400,44 @@ class Sim():
     def __select_random_locs(self, N, w):
         """
         Generate `N` random coordinates in the sim env for
-        objects of widh `w` such that none of them will
-        overlap.
-        Args:
-            N: Number of coordinates to generate.
-            w: Width of the object whose coordinates we're 
-               generating.
-        Returns:
-            centers: The coordinate of the centers of the `N`
-                     objects width width `w`.
-        Raises:
-            None.
+        objects of width `w` such that none of them will
+        overlap with each other, the car's start position, 
+        or the walls.
         """
-        # Define the range of possible coordinates for the obstacle centers
-        valid_size = self.floor_s - self.wall_w # need to consider wall width
-        x_range = (w/2 - valid_size/2, valid_size/2 - w/2)
-        y_range = (w/2 - valid_size/2, valid_size/2 - w/2)
-        
-        # Initialize an empty list of obstacle centers
+        # How much space car needs to fit
+        car_width = 0.4       # your car width
+        margin = car_width + 0.1  # extra buffer for safety
+
+        # Define the range of possible coordinates for obstacle centers
+        # Take into account walls and margin
+        x_min = -self.floor_s/2 + self.wall_w + margin + w/2
+        x_max =  self.floor_s/2 - self.wall_w - margin - w/2
+        y_min = -self.floor_s/2 + self.wall_w + margin + w/2
+        y_max =  self.floor_s/2 - self.wall_w - margin - w/2
+
         centers = []
 
-        # Generate n random obstacle centers until we have enough non-overlapping ones
         while len(centers) < N:
             # Generate a random center
-            center = (round(random.uniform(*x_range), 1), round(random.uniform(*y_range), 1))
-            # Check if the obstacle overlaps with any of the previous ones
+            center = (round(random.uniform(x_min, x_max), 2), round(random.uniform(y_min, y_max), 2))
+
+            # Check overlap with existing obstacles
             overlaps = False
             for other in centers:
                 if abs(center[0] - other[0]) < w and abs(center[1] - other[1]) < w:
                     overlaps = True
                     break
 
-            # Check if the obstacle overlaps with starting coord or the area covered by width w at starting coord.
-
+            # Check overlap with starting position
             if abs(center[0] - self.agent_pos[0]) < w and abs(center[1] - self.agent_pos[1]) < w:
                 overlaps = True
-            
-            # If the obstacle doesn't overlap, add it to the list of centers
+
             if not overlaps:
                 centers.append(center)
 
         return centers
-
+    
+    
     def __read_custom_env_file(self, filepath):
         # Open file and read contents
         with open(filepath, 'r') as f:

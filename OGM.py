@@ -73,8 +73,8 @@ class OGM:
             new_map= np.zeros((new_sizex, new_sizey), dtype=np.float32)
             
             # Calculate offset for copying old map data
-            offset_x= int(np.floor((self.MAP['xmin'] - new_xmin) / self.MAP['res']))
-            offset_y= int(np.floor((self.MAP['ymin'] - new_ymin) / self.MAP['res']))
+            offset_x= int(np.round((self.MAP['xmin'] - new_xmin) / self.MAP['res']))
+            offset_y= int(np.round((self.MAP['ymin'] - new_ymin) / self.MAP['res']))
             
             # Copy old map data to new map
             new_map[offset_x:offset_x + self.MAP['sizex'], 
@@ -166,7 +166,7 @@ class OGM:
     def ogm_plot(self, x, y, occupied=False, scale=1, bound=10):
         if not (0 <= x < self.MAP['sizex'] and 0 <= y < self.MAP['sizey']):
             return
-        confidence= 0.9 # confidence level of the sensor
+        confidence= 0.95 # confidence level of the sensor
         if occupied:
             odds= confidence / (1 - confidence)
         else:
@@ -196,12 +196,12 @@ class OGM:
     def bressenham_mark_Cells(self, scan, robot_pose):
         
         
-        sensor_pose=robot_pose+np.array([
-            np.cos(robot_pose[2])*self.sensor_x_r - np.sin(robot_pose[2])*self.sensor_y_r, 
-            np.sin(robot_pose[2])*self.sensor_x_r + np.cos(robot_pose[2])*self.sensor_y_r, 
-            self.sensor_yaw_r
+        sensor_pose = np.array([
+            robot_pose[0] + np.cos(robot_pose[2]) * self.sensor_x_r - np.sin(robot_pose[2]) * self.sensor_y_r,
+            robot_pose[1] + np.sin(robot_pose[2]) * self.sensor_x_r + np.cos(robot_pose[2]) * self.sensor_y_r,
+            robot_pose[2] + self.sensor_yaw_r
         ])
-        
+       
         freeInd=(scan >= self.lidar_range_min)&(scan <= self.lidar_range_max)
         
         world_angles=self.angles[freeInd]-sensor_pose[2]+np.pi
