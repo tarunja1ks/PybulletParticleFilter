@@ -9,6 +9,7 @@ from rpg.sensors import Camera, Lidar, IMU
 from algorithms.Control.Controller import KeyboardController
 from utilities.timings import Timings
 from OGM import OGM
+from ParticleFilter import ParticleFilter
 import numpy as np
 import pybullet as p
 import math
@@ -62,6 +63,8 @@ if __name__ == "__main__":
     
     
     ogm=OGM()
+    
+    
     
     simdex=0
     while True:
