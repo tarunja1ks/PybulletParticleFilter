@@ -61,6 +61,7 @@ class ParticleFilter:
     
     def testang(self,vel,dt):
         self.ang+=vel*dt
+        return self.ang
         
         
         

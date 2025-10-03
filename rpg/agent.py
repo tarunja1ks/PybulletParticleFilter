@@ -463,31 +463,9 @@ class HuskyKuka:
         self.wheelDeltasFwd = [1, 1, 1, 1]
         self.speed = 5.0
 
-        self.kuka_id = p.loadURDF(self.KUKA_URDF_PATH, [0, 0, 0.5], [0, 0, 0, 1])
 
-        # Attach the Kuka arm to the Husky.
-        p.createConstraint(self.husky_id, -1, self.kuka_id, -1, p.JOINT_FIXED, [0, 0, 0], [0, 0, 0], [0., 0., -.5],
-                         [0, 0, 0, 1])
 
-        # Reset the Kuka joint positions.
-        joint_positions = [3.559609, 0.411182, 0.862129, 1.744441, 0.077299, -1.129685, 0.006001]
-        for joint_index in range(p.getNumJoints(self.kuka_id)):
-            p.resetJointState(self.kuka_id, joint_index, joint_positions[joint_index])
-            p.setJointMotorControl2(self.kuka_id, joint_index, p.VELOCITY_CONTROL, force=0)
 
-        # Kuka arm settings.
-        self.kuka_end_effector_index = 6
-        self.num_joints = p.getNumJoints(self.kuka_id)
-
-        self.ll = [-.967, -2, -2.96, 0.19, -2.96, -2.09, -3.05]
-        self.ul = [.967, 2, 2.96, 2.29, 2.96, 2.09, 3.05]
-        self.jr = [5.8, 4, 5.8, 4, 5.8, 4, 6]
-        self.rp = [0, 0, 0, 0.5 * math.pi, 0, -math.pi * 0.5 * 0.66, 0]
-        self.jd = [0.1] * self.num_joints
-
-        for i in range(self.num_joints):
-            p.resetJointState(self.kuka_id, i, self.rp[i])
-            p.setJointMotorControl2(self.kuka_id, i, p.VELOCITY_CONTROL, force=0)
 
         # Reset Husky joints.
         self.__reset_robot_joints(self.husky_id)

@@ -72,8 +72,6 @@ if __name__ == "__main__":
         if ctrl_time.update_time():
             v, s, arm_angles = controller.navigate(x, y, yaw) 
             
-            # Control the robotic arm
-            husky_kuka.control_arm_forward(arm_angles)    
            
             husky_kuka.act(v, s) 
             

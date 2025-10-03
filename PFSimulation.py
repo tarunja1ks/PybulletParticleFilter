@@ -16,8 +16,8 @@ import math
 import time
 # Declare user-specific paths to files.
 ENV_PATH = "src/configs/env/simple_env.yaml"
-CAR_PATH = "src/configs/car/car_config.yaml"
-CAR_URDF_PATH = "src/configs/resources/f10_racecar/racecar_ackermann.urdf"
+CAR_PATH = "src/configs/husky_kuka/husky_kuka_config.yaml"
+CAR_URDF_PATH = "src/configs/resources/husky/husky.urdf"
 
 # FPS constants.
 CTRL_FPS = 100 # Perform control at 100Hz
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     numberOfParticles=2
     pf=ParticleFilter(np.array([0,0,0]),ogm,numberOfParticles)    
     
-    prev_time=0
+    prev_time=time.time()
     
     simdex=0
     while True:
@@ -86,14 +86,15 @@ if __name__ == "__main__":
             
             
             
-            imu_data = car.get_sensor_data("imu")
-            imu_lin_vel = imu_data["linear_velocity"][:2]
-            imu_ang_vel = imu_data["angular_velocity"][2]
+            imu_data=car.get_sensor_data("imu")
+            imu_lin_vel=imu_data["linear_velocity"][:2]
+            imu_ang_vel=imu_data["angular_velocity"][2]
             
-            dt=time.time()-prev_time
-            prev_time=time.time()
-            
-            print(pf.testang)
+            curr=time.time()
+            dt=curr-prev_time
+            prev_time=curr
+                        
+            print(pf.testang(imu_ang_vel,dt))
             
             
             
