@@ -27,18 +27,11 @@ class ParticleFilter:
     def __init__(self, initial_pose, OGM, numberofparticles=3):
         dataset=20
         self.numberofparticles=numberofparticles
-        with np.load("./Data/Imu%d.npz"%dataset) as data:
-            self.imu_angular_velocity=data["angular_velocity"] # angular velocity in rad/sec
-            self.imu_linear_acceleration=data["linear_acceleration"] # Accelerations in gs (gravity acceleration scaling)
-            self.imu_stamps=data["time_stamps"]  # acquisition times of the imu measurements
-        with np.load("./Data/Encoders%d.npz"%dataset) as data:
-            self.encoder_counts=data["counts"] # 4 x n encoder counts
-            self.encoder_stamps=data["time_stamps"] # encoder time stamps
-    
+        self.ang=0
         self.particle_poses= np.tile(initial_pose, (self.numberofparticles, 1)).astype(np.float64)
         self.particle_weights= np.ones(self.numberofparticles)/self.numberofparticles
         
-        self.NumberEffective=numberOfParticles
+        self.NumberEffective=numberofparticles
         self.sigma_v=0.03 # the stdev for lin vel
         self.sigma_w=0.03 # the stdev for ang vel 
         self.lidar_stdev=0.05
@@ -66,6 +59,9 @@ class ParticleFilter:
     def setPose(self,pose):
         self.xt=pose
     
+    def testang(self,vel,dt):
+        self.ang+=vel*dt
+        
         
         
     def prediction_step(self,U, Tt): # in the prediction step we create the noise and update the poses
@@ -176,74 +172,9 @@ class ParticleFilter:
     
     
 
-initial_pose=np.array([0,0,0])
-numberOfParticles=100
-
-
-reads=np.load( "reads.npz")['reads_data']
-lin_vel=0
-ang_vel=0
-
-ogm=OGM()
-last_t=reads[0][1]
-
-pf=ParticleFilter(initial_pose,ogm,numberOfParticles)
-
-ogm.bressenham_mark_Cells(ogm.lidar_ranges[:,0],pf.particle_poses[0])
-ogm.showPlots()
-
-
-# purely localization 
-
-# Trajectories=[Trajectory(initial_pose) for i in range(pf.numberofparticles)]
-
-# iterating through all of the reads to update models/displays
-ind=0
 
 
 
-for event in tqdm(reads, desc="Processing events"):
-    dt=float(event[1]) - float(last_t)
-    if dt > 0:
-        pf.prediction_step([float(lin_vel), float(ang_vel)], dt)
-        for i in range(pf.numberofparticles):
-            current_pose_vector=pf.particle_poses[i]  # numeric poses
-            # Trajectories[i].trajectory_x.append(current_pose_vector[0])
-            # Trajectories[i].trajectory_y.append(current_pose_vector[1])
-            # Trajectories[i].trajectory_h.append(current_pose_vector[2])
-
-    if event[0] == "e":  # encoder
-        lin_vel=event[2]
-    elif event[0] == "i":  # imu500
-        ang_vel=event[2]
-    elif event[0] == "l":  # lidar
-        try:
-            new_Pose=pf.update_step(ogm, ogm.lidar_ranges[:, int(event[2])])
-        except:
-            continue
-        print(ogm.lidar_ranges[:,int(event[2])])
-        ogm.bressenham_mark_Cells(ogm.lidar_ranges[:, int(event[2])], new_Pose)
-        # ogm.updatePlot()
-        pf.resampling_step()
-        ind += 1
-        if(ind==3):
-            break
-        if(ind%1==0):
-            gc.collect()
-            torch.mps.empty_cache()
-
-    else:
-        continue
-    last_t=event[1]
-    
-    
-# [i.showPlot() for i in Trajectories] #showing the robots trajectory from encoders/imu
-
-
-    
-ogm.updatePlot() 
-plt.show() 
-plt.pause(10000000)
 
 
     

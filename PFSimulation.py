@@ -13,6 +13,7 @@ from ParticleFilter import ParticleFilter
 import numpy as np
 import pybullet as p
 import math
+import time
 # Declare user-specific paths to files.
 ENV_PATH = "src/configs/env/simple_env.yaml"
 CAR_PATH = "src/configs/car/car_config.yaml"
@@ -56,15 +57,20 @@ if __name__ == "__main__":
 
         
     
+ 
+        
     
     
     
     
-    
-    
+    # ogm
     ogm=OGM()
     
+    # particle filter
+    numberOfParticles=2
+    pf=ParticleFilter(np.array([0,0,0]),ogm,numberOfParticles)    
     
+    prev_time=0
     
     simdex=0
     while True:
@@ -77,10 +83,23 @@ if __name__ == "__main__":
 
             rays_data, dists, coords = car.get_sensor_data("lidar")
             car.simulate_sensor("lidar", rays_data)
-
+            
+            
+            
             imu_data = car.get_sensor_data("imu")
-            imu_lin_accel = imu_data["linear_acceleration"]
-            imu_ang_vel = imu_data["angular_velocity"]
+            imu_lin_vel = imu_data["linear_velocity"][:2]
+            imu_ang_vel = imu_data["angular_velocity"][2]
+            
+            dt=time.time()-prev_time
+            prev_time=time.time()
+            
+            print(pf.testang)
+            
+            
+            
+            
+            
+            
             
             ogm.bressenham_mark_Cells(np.array(dists), np.array([x,y,yaw]))
             # x2,y2=ogm.meter_to_cell(np.array([x,y]))

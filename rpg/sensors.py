@@ -622,6 +622,8 @@ class IMU(Sensor):
 
         imu_data = {
             "angular_velocity": z_omega,
-            "linear_acceleration": z_alpha
+            "linear_acceleration": z_alpha,
+            "linear_velocity": linear_velocity
+            
         }
         return imu_data
