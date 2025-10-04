@@ -17,7 +17,7 @@ import multiprocessing.resource_tracker as rt
 import warnings
 import torch
 
-matplotlib.use('TkAgg')
+# matplotlib.use('TkAgg')
 
 
 
@@ -39,6 +39,7 @@ class ParticleFilter:
         self.covariance=np.asarray([[self.sigma_v**2,0],[0,self.sigma_w**2]])
         self.xt=initial_pose
 
+        self.prev_ang=0
         self.robotTosensor= np.array([OGM.sensor_x_r, OGM.sensor_y_r, OGM.sensor_yaw_r])
         self.device = torch.device('mps') # using gpu
 
@@ -60,7 +61,8 @@ class ParticleFilter:
         self.xt=pose
     
     def testang(self,vel,dt):
-        self.ang+=vel*dt
+        self.ang+=(vel+self.prev_ang)*dt/2
+        self.prev_ang=vel
         return self.ang
         
         

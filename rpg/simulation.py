@@ -125,7 +125,7 @@ class Sim():
             self.__place_obstacles(custom=self.custom)
         
         # Place the goal.
-        self.__place_goal(loc=goal_loc)
+        # self.__place_goal(loc=goal_loc)
 
     def draw_planned_path(self, path):
         """

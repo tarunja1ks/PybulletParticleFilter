@@ -1,23 +1,27 @@
 # ---------------------------------
-# Car: Code to get simulator running. (Ackermann Drive)
+# husky_kuka: Code to get simulator running. (Ackermann Drive)
 # ---------------------------------
 
 from matplotlib import pyplot as plt
-from rpg.agent import Car
+from rpg.agent import HuskyKuka
 from rpg.simulation import Sim
 from rpg.sensors import Camera, Lidar, IMU
 from algorithms.Control.Controller import KeyboardController
 from utilities.timings import Timings
 from OGM import OGM
 from ParticleFilter import ParticleFilter
+from plot import MultiLinePlot
 import numpy as np
 import pybullet as p
 import math
 import time
+
+
 # Declare user-specific paths to files.
 ENV_PATH = "src/configs/env/simple_env.yaml"
-CAR_PATH = "src/configs/husky_kuka/husky_kuka_config.yaml"
-CAR_URDF_PATH = "src/configs/resources/husky/husky.urdf"
+HUSKY_PATH = "src/configs/husky_kuka/husky_kuka_config.yaml"
+KUKA_URDF_PATH = "src/configs/resources/kuka_iiwa/model_free_base.urdf"
+HUSKY_URDF_PATH = "src/configs/resources/husky/husky.urdf"
 
 # FPS constants.
 CTRL_FPS = 100 # Perform control at 100Hz
@@ -29,38 +33,36 @@ PRINT_FPS = 4 # Print `dist` every 5 seconds for debugging
 SENSORS = [Camera, Lidar, IMU]
 
 # Declare controller
-controller = KeyboardController(ctrl_fps=CTRL_FPS)
+
+controller = KeyboardController(ctrl_fps=CTRL_FPS, 
+                                arm=False, 
+                                forward=True, 
+                                num_joints=7) # Control the husky_kuka and arm with the keyboard
 
 if __name__ == "__main__":
     
-    # Initialize simulation.
+      # Initialize simulation.
     sim = Sim(time_step_freq=120, debug=False)
     sim.create_env(env_config=ENV_PATH) # add extra argument to load file with map
 
-    car = Car(
-            urdf_path=CAR_URDF_PATH, 
-            car_config=CAR_PATH, 
-            sensors=SENSORS,
-            debug=False
-    )
+    husky_kuka = HuskyKuka(
+        husky_urdf_path=HUSKY_URDF_PATH, 
+        kuka_urdf_path=KUKA_URDF_PATH, 
+        husky_config=HUSKY_PATH,
+        sensors=SENSORS,
+        debug=False
+        )
 
-    car.place_car(sim.floor)
+    husky_kuka.place_robot(floor=sim.floor)
 
     # Set sim response time.
     ctrl_time = Timings(CTRL_FPS)
     camera_time = Timings(CAMERA_FPS)
     print_frequency = Timings(PRINT_FPS)
 
-    pose = None # Car's state (in this case, it's the car's pose)
+    pose = None # husky_kuka's state (in this case, it's the husky_kuka's pose)
     
-    # creating matplotlib map for the og    
-
-        
-    
- 
-        
-    
-    
+    # creating matplotlib map for the og   
     
     
     # ogm
@@ -70,44 +72,40 @@ if __name__ == "__main__":
     numberOfParticles=2
     pf=ParticleFilter(np.array([0,0,0]),ogm,numberOfParticles)    
     
-    prev_time=time.time()
     
     simdex=0
+    
     while True:
         try:
-            pose = car.get_state(to_array=False,radian=True)
+            pose = husky_kuka.get_state(to_array=False, radian=False)
             x, y, yaw = pose
             y=-y
 
             ## ... Algorithm Inserted Here (e.g. PID Control) ... ##
 
-            rays_data, dists, coords = car.get_sensor_data("lidar")
-            car.simulate_sensor("lidar", rays_data)
+            rays_data, dists, coords = husky_kuka.get_sensor_data("lidar")
+            husky_kuka.simulate_sensor("lidar", rays_data)
             
             
             
-            imu_data=car.get_sensor_data("imu")
+            imu_data=husky_kuka.get_sensor_data("imu")
+            
+            
             imu_lin_vel=imu_data["linear_velocity"][:2]
             imu_ang_vel=imu_data["angular_velocity"][2]
+            dt=imu_data["dt"]
+            ya=imu_data["yaw"]
             
-            curr=time.time()
-            dt=curr-prev_time
-            prev_time=curr
                         
-            print(pf.testang(imu_ang_vel,dt))
             
             
-            
-            
-            
-            
-            
-            ogm.bressenham_mark_Cells(np.array(dists), np.array([x,y,yaw]))
+            ogm.bressenham_mark_Cells(np.array(dists), np.array([x,y,yaw*np.pi/180]))
             # x2,y2=ogm.meter_to_cell(np.array([x,y]))
             # ogm.ogm_plot(x2,y2,True)
             
-
+            thing=pf.testang(imu_ang_vel/10,dt)
             if print_frequency.update_time():
+                print(thing,ya,imu_data["pitch"],imu_data["roll"],imu_ang_vel,dt)
                 robot_pose=np.array([x,y,yaw])
                 sensor_pose = robot_pose + np.array([np.cos(robot_pose[2])*0.265 - np.sin(robot_pose[2])*0, np.sin(robot_pose[2])*0.265 + np.cos(robot_pose[2])*0, -math.pi/2])
                 pass # debugging statements
@@ -117,10 +115,11 @@ if __name__ == "__main__":
             if ctrl_time.update_time():
                 v, s = controller.navigate(x, y, yaw)    
             
-                car.act(v, s)
+                husky_kuka.act(v, s)
                 
                 sim.step() # Advance one time step in the sim
-                sim.view(x,-y, yaw, "distant")
+                sim.view(x,-y, yaw, "distant")  
+                
         except KeyboardInterrupt:
             print("\n[INFO] Ctrl+C detected, stopping simulation...")
             break

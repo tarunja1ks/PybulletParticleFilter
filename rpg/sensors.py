@@ -588,6 +588,8 @@ class IMU(Sensor):
         # Store previous linear velocity for acceleration calculation
         self.prev_linear_velocity = np.zeros(3)
         self.prev_time = time.time()
+        
+       
 
     def retrieve_data(self, common=True, robot_state=None) -> dict:
         """
@@ -601,29 +603,45 @@ class IMU(Sensor):
         Returns:
             imu_data: A dictionary with linear acceleration and angular velocity.
         """
-        current_time = time.time()
+        current_time = time.perf_counter()
         dt = current_time - self.prev_time
         self.prev_time = current_time
 
         linear_velocity, angular_velocity = p.getBaseVelocity(self.car_id)
+        
+        
         pos, orn = p.getBasePositionAndOrientation(self.car_id)
         linear_velocity = np.array(linear_velocity)
         angular_velocity = np.array(angular_velocity)
         orn_mat = np.array(p.getMatrixFromQuaternion(orn)).reshape(3, 3)
-
+        x,y,z,w=orn
+        yaw=math.atan2(2*(w*z+x*y),1-2*(y*y+z*z))
         # Calculate linear acceleration
         linear_acceleration = (linear_velocity - self.prev_linear_velocity) / dt
         self.prev_linear_velocity = linear_velocity
 
         # Add biases and noise
         z_omega = np.dot(orn_mat.T, angular_velocity) + self.bg + np.random.randn(3) * self.ng_std
+        # z_omega=angular_velocity
+        # print(z_omega)
+        # print("--------")
         gravity = np.array([0, 0, -9.81])
         z_alpha = np.dot(orn_mat.T, (linear_acceleration - gravity)) + self.ba + np.random.randn(3) * self.na_std
 
+        
+        pos, orn = p.getBasePositionAndOrientation(self.car_id)
+        roll, pitch, yaw = p.getEulerFromQuaternion(orn)
+        
+        
+        dt= p.getPhysicsEngineParameters()['fixedTimeStep']
         imu_data = {
             "angular_velocity": z_omega,
             "linear_acceleration": z_alpha,
-            "linear_velocity": linear_velocity
+            "linear_velocity": linear_velocity,
+            "dt": dt,
+            "yaw":yaw,
+            "roll":roll,
+            "pitch":pitch
             
         }
         return imu_data

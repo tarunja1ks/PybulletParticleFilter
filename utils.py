@@ -5,7 +5,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import time
 import math
 from numba import njit
-matplotlib.use('TkAgg')
+# matplotlib.use('TkAgg')
 class utils: 
   
   def tic():

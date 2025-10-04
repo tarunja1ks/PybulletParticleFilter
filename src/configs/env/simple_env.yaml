@@ -3,7 +3,7 @@
  wall_w: 0.75 # width of side walls.
  floor_s: 10 # Creates a x by x floor, where x := floor_s
  floor_h: 0.001 # Height of floor.
- n_obs: 5 # No. of obstacles.
+ n_obs: 2 # No. of obstacles.
  obs_h: 0.75 # Height of obstacles.
  obs_w: 2 # Width of obstacles.
  goal_w: 2 # Width of goal.
