@@ -461,7 +461,7 @@ class HuskyKuka:
         self.wheelVelocities = [0, 0, 0, 0]
         self.wheelDeltasTurn = [1, -1, 1, -1]
         self.wheelDeltasFwd = [1, 1, 1, 1]
-        self.speed = 5.0
+        self.speed = 3.0
 
 
 

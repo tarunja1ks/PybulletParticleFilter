@@ -613,18 +613,16 @@ class IMU(Sensor):
         pos, orn = p.getBasePositionAndOrientation(self.car_id)
         linear_velocity = np.array(linear_velocity)
         angular_velocity = np.array(angular_velocity)
+        angular_velocity=np.insert(angular_velocity,0,0.0)
+        
+
         orn_mat = np.array(p.getMatrixFromQuaternion(orn)).reshape(3, 3)
-        x,y,z,w=orn
-        yaw=math.atan2(2*(w*z+x*y),1-2*(y*y+z*z))
+        
         # Calculate linear acceleration
         linear_acceleration = (linear_velocity - self.prev_linear_velocity) / dt
         self.prev_linear_velocity = linear_velocity
 
         # Add biases and noise
-        z_omega = np.dot(orn_mat.T, angular_velocity) + self.bg + np.random.randn(3) * self.ng_std
-        # z_omega=angular_velocity
-        # print(z_omega)
-        # print("--------")
         gravity = np.array([0, 0, -9.81])
         z_alpha = np.dot(orn_mat.T, (linear_acceleration - gravity)) + self.ba + np.random.randn(3) * self.na_std
 
@@ -632,16 +630,15 @@ class IMU(Sensor):
         pos, orn = p.getBasePositionAndOrientation(self.car_id)
         roll, pitch, yaw = p.getEulerFromQuaternion(orn)
         
-        
-        dt= p.getPhysicsEngineParameters()['fixedTimeStep']
+        dt=p.getPhysicsEngineParameters()['fixedTimeStep']
         imu_data = {
-            "angular_velocity": z_omega,
+            "angular_velocity": angular_velocity,
             "linear_acceleration": z_alpha,
             "linear_velocity": linear_velocity,
             "dt": dt,
             "yaw":yaw,
             "roll":roll,
-            "pitch":pitch
+            "pitch":pitch,
             
         }
         return imu_data

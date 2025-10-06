@@ -27,22 +27,35 @@ class ParticleFilter:
     def __init__(self, initial_pose, OGM, numberofparticles=3):
         dataset=20
         self.numberofparticles=numberofparticles
-        self.ang=0
+        self.q=np.array([1.0, 0.0, 0.0, 0.0])
         self.particle_poses= np.tile(initial_pose, (self.numberofparticles, 1)).astype(np.float64)
         self.particle_weights= np.ones(self.numberofparticles)/self.numberofparticles
         
+        self.quaternions=np.repeat(np.array([[1.0, 0.0, 0.0, 0.0]]),self.numberofparticles, axis=0)
+        
         self.NumberEffective=numberofparticles
-        self.sigma_v=0.03 # the stdev for lin vel
-        self.sigma_w=0.03 # the stdev for ang vel 
+        self.sigma_x=0.03 # the stdev for lin vel
+        self.sigma_y=0.03 # the stdev for ang vel 
+        self.sigma_roll=0.0005
+        self.sigma_pitch=0.0005
+        self.sigma_yaw=0.005
         self.lidar_stdev=0.05
         
-        self.covariance=np.asarray([[self.sigma_v**2,0],[0,self.sigma_w**2]])
+        self.lin_covariance=np.asarray([[self.sigma_x**2,0],[0,self.sigma_y**2]])
+        self.ang_covariance=np.zeros((4, 4))
+        self.ang_covariance[1,1]=self.sigma_roll**2
+        self.ang_covariance[2,2]=self.sigma_pitch**2
+        self.ang_covariance[3,3]=self.sigma_yaw**2
+        
+        
         self.xt=initial_pose
 
         self.prev_ang=0
         self.robotTosensor= np.array([OGM.sensor_x_r, OGM.sensor_y_r, OGM.sensor_yaw_r])
         self.device = torch.device('mps') # using gpu
 
+        
+        
     def normal_pdf(self,x, mu, sigma):
         return np.exp(-0.5*((x - mu)/sigma)**2) / (sigma * np.sqrt(2*np.pi))
     
@@ -59,31 +72,55 @@ class ParticleFilter:
     
     def setPose(self,pose):
         self.xt=pose
-    
+        
+    def quaternion_multiply(self, q1, q0):
+
+        w0,x0,y0,z0= q0[:,0],q0[:,1],q0[:,2],q0[:,3]
+        w1,x1,y1,z1= q1[:,0],q1[:,1],q1[:,2],q1[:,3]
+
+        output=np.stack([
+            w1*w0-x1*x0-y1*y0-z1*z0,
+            w1*x0+ x1*w0+y1*z0-z1*y0,
+            w1*y0-x1*z0+y1*w0+z1*x0,
+            w1*z0+x1*y0-y1*x0+z1*w0
+        ], axis=1)
+        
+        norms = np.linalg.norm(output, axis=1, keepdims=True)
+        norms = np.where(norms == 0, 1, norms)  
+        output /= norms
+
+        return output
+        
+        
+        
     def testang(self,vel,dt):
-        self.ang+=(vel+self.prev_ang)*dt/2
-        self.prev_ang=vel
-        return self.ang
+        self.q+=0.5*dt*self.quaternion_multiply(self.q,vel)
+        self.q/=np.linalg.norm(self.q)
+        return self.q
         
         
         
-    def prediction_step(self,U, Tt): # in the prediction step we create the noise and update the poses
-            noise= np.random.multivariate_normal([0,0], self.covariance, size=self.numberofparticles)
-            noisy_U= U + noise
-            vel= noisy_U[:,0]
-            ang= noisy_U[:,1]
-            theta= self.particle_poses[:,2]
+    def prediction_step(self,linU, angU, dt): # in the prediction step we create the noise and update the poses
+            # lin_noise= np.random.multivariate_normal([0, 0], self.lin_covariance, size=self.numberofparticles)
+            # ang_noise= np.random.multivariate_normal([0,0,0,0], self.ang_covariance, size=self.numberofparticles)
+            # noisy_linU=linU+lin_noise
+            # noisy_angU=angU+ang_noise
+            noisy_linU=linU
+            noisy_angU=angU
+
+            dx=noisy_linU[:,0]*dt/10
+            dy=noisy_linU[:,1]*dt/10
             
-            angle= ang * Tt / 2
-            sinc_angle=util.sinc(angle)
+            self.quaternions=0.5*dt*self.quaternion_multiply(self.quaternions,noisy_angU)
             
-            dx= Tt * vel * sinc_angle * np.cos(theta + angle)
-            dy= Tt * vel * sinc_angle * np.sin(theta + angle)
-            dtheta= Tt * ang
             
-            self.particle_poses[:,0] += dx
-            self.particle_poses[:,1] += dy
-            self.particle_poses[:,2] += dtheta
+            self.particle_poses[:,0]+=dx
+            self.particle_poses[:,1]+=dy
+            
+            w,x,y,z=self.quaternions.T
+            self.particle_poses[:,2]= np.arctan2(2*(w*z+x*y),1-2*(y*y+z*z))
+            
+
             
     def update_step(self, OGM, scan, max_cell_range=600):
 

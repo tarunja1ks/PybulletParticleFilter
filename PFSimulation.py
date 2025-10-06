@@ -92,23 +92,20 @@ if __name__ == "__main__":
             
             
             imu_lin_vel=imu_data["linear_velocity"][:2]
-            imu_ang_vel=imu_data["angular_velocity"][2]
+            imu_ang_vel=imu_data["angular_velocity"]
             dt=imu_data["dt"]
             ya=imu_data["yaw"]
             
-                        
-            
             
             ogm.bressenham_mark_Cells(np.array(dists), np.array([x,y,yaw*np.pi/180]))
-            # x2,y2=ogm.meter_to_cell(np.array([x,y]))
-            # ogm.ogm_plot(x2,y2,True)
+            pf.prediction_step(np.repeat(imu_lin_vel,pf.numberofparticles).reshape(pf.numberofparticles,2), np.repeat(imu_ang_vel,numberOfParticles).reshape(pf.numberofparticles,4),dt)
             
-            thing=pf.testang(imu_ang_vel/10,dt)
             if print_frequency.update_time():
-                print(thing,ya,imu_data["pitch"],imu_data["roll"],imu_ang_vel,dt)
                 robot_pose=np.array([x,y,yaw])
+                print(pf.particle_poses,robot_pose)
                 sensor_pose = robot_pose + np.array([np.cos(robot_pose[2])*0.265 - np.sin(robot_pose[2])*0, np.sin(robot_pose[2])*0.265 + np.cos(robot_pose[2])*0, -math.pi/2])
                 pass # debugging statements
+            
             if(simdex%40==0):
                 ogm.show_cv2()
             simdex+=1

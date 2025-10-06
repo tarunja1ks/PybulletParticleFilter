@@ -103,7 +103,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
   <!-- Husky wheel macros -->
   <link name="front_left_wheel_link">
   	<contact>
-      <lateral_friction value="1.0"/>
+      <lateral_friction value="1.7"/>
       <rolling_friction value="0.0"/>
       <stiffness value="30000"/>
       <damping value="1000"/>
@@ -154,7 +154,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
   </transmission>
   <link name="front_right_wheel_link">
     <contact>
-      <lateral_friction value="1.0"/>
+      <lateral_friction value="1.7"/>
       <rolling_friction value="0.0"/>
       <stiffness value="30000"/>
       <damping value="1000"/>
@@ -205,7 +205,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
   </transmission>
   <link name="rear_left_wheel_link">
     <contact>
-      <lateral_friction value="1.0"/>
+      <lateral_friction value="1.7"/>
       <rolling_friction value="0.0"/>
       <stiffness value="30000"/>
       <damping value="1000"/>
@@ -256,7 +256,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
   </transmission>
   <link name="rear_right_wheel_link">
     <contact>
-      <lateral_friction value="1.0"/>
+      <lateral_friction value="1.7"/>
       <rolling_friction value="0.0"/>
       <stiffness value="30000"/>
       <damping value="1000"/>
