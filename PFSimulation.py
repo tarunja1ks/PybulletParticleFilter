@@ -75,7 +75,7 @@ if __name__ == "__main__":
     
     simdex=0
     
-    estimaed_pose=[0,0,0]
+    estimated_pose=[0,0,0]
     
     while True:
         try:
@@ -106,7 +106,7 @@ if __name__ == "__main__":
             if print_frequency.update_time():
                 robot_pose=np.array([x,y,yaw])
                 print("-----------")
-                print(estimaed_pose,"-",robot_pose,"-")
+                print(estimated_pose,"-",robot_pose,"-")
                 pass # debugging statements
             
             if(simdex%40==0):
@@ -116,12 +116,13 @@ if __name__ == "__main__":
             if ctrl_time.update_time():
                 v, s = controller.navigate(x, y, yaw)    
                 
-                
-                ogm.bressenham_mark_Cells(np.array(dists), np.array([x,y,yaw*np.pi/180]))
+                x,y,yaw*np.pi/180
+                e_x,e_y,e_yaw=estimated_pose
+                ogm.bressenham_mark_Cells(np.array(dists), np.array([e_x,e_y,e_yaw*np.pi/180]))
             
                 pf.prediction_step(np.tile(imu_lin_vel, (pf.numberofparticles, 1)), np.tile(imu_ang_vel, (pf.numberofparticles, 1)), dt)
                 
-                estimaed_pose=pf.update_step(ogm,np.array(dists),40)
+                estimated_pose=pf.update_step(ogm,np.array(dists),40)
                 
                 husky_kuka.act(v, s)
                 
