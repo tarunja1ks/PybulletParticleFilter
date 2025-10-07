@@ -115,9 +115,16 @@ if __name__ == "__main__":
             
             if ctrl_time.update_time():
                 v, s = controller.navigate(x, y, yaw)    
+                
+                
                 ogm.bressenham_mark_Cells(np.array(dists), np.array([x,y,yaw*np.pi/180]))
             
                 pf.prediction_step(np.tile(imu_lin_vel, (pf.numberofparticles, 1)), np.tile(imu_ang_vel, (pf.numberofparticles, 1)), dt)
+                
+                pf.update_step(ogm,np.array(dists),40)
+                
+
+                
                 husky_kuka.act(v, s)
                 
                 sim.step() # Advance one time step in the sim
