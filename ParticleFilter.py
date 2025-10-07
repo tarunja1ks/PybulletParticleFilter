@@ -36,16 +36,16 @@ class ParticleFilter:
         self.NumberEffective=numberofparticles
         self.sigma_x=0.03 # the stdev for lin vel
         self.sigma_y=0.03 # the stdev for ang vel 
-        self.sigma_roll=0.0005
-        self.sigma_pitch=0.0005
-        self.sigma_yaw=0.005
-        self.lidar_stdev=0.05
+        self.sigma_roll=0.000
+        self.sigma_pitch=0.000
+        self.sigma_yaw=0.000001
+        self.lidar_stdev=0.01
         
         self.lin_covariance=np.asarray([[self.sigma_x**2,0],[0,self.sigma_y**2]])
-        self.ang_covariance=np.zeros((4, 4))
-        self.ang_covariance[1,1]=self.sigma_roll**2
-        self.ang_covariance[2,2]=self.sigma_pitch**2
-        self.ang_covariance[3,3]=self.sigma_yaw**2
+        self.ang_covariance=np.zeros((3, 3))
+        self.ang_covariance[0,0]=self.sigma_roll**2
+        self.ang_covariance[1,1]=self.sigma_pitch**2
+        self.ang_covariance[2,2]=self.sigma_yaw**2
         
         
         self.xt=initial_pose
@@ -100,23 +100,26 @@ class ParticleFilter:
         
         
     def prediction_step(self,linU, angU, dt): # in the prediction step we create the noise and update the poses
-            # lin_noise= np.random.multivariate_normal([0, 0], self.lin_covariance, size=self.numberofparticles)
-            # ang_noise= np.random.multivariate_normal([0,0,0,0], self.ang_covariance, size=self.numberofparticles)
-            # noisy_linU=linU+lin_noise
-            # noisy_angU=angU+ang_noise
-            noisy_linU=linU
-            noisy_angU=angU
+            lin_noise= np.random.multivariate_normal([0, 0], self.lin_covariance, size=self.numberofparticles)
+            ang_noise= np.random.multivariate_normal([0,0,0], self.ang_covariance, size=self.numberofparticles)
+            noisy_linU=linU+lin_noise
+            noisy_angU=angU+ang_noise
 
             # linear changes
-            dx=noisy_linU[:,0]*dt/10
-            dy=noisy_linU[:,1]*dt/10
+            # dt=1/1060 
+            dx=noisy_linU[:,0]*dt
+            dy=noisy_linU[:,1]*dt
             
-            theta =np.linalg.norm(noisy_angU, axis=1)*dt/10 # calculating the theta 
+            theta = np.linalg.norm(noisy_angU, axis=1) * dt
             axis = noisy_angU / np.linalg.norm(noisy_angU, axis=1)[:, None]
             axis = np.nan_to_num(axis)
-            dq=np.hstack([np.cos(theta/2)[:, None], axis * np.sin(theta/2)[:, None]])
 
-            self.quaternions=self.quaternion_multiply(self.quaternions,dq)
+            xyz = axis * np.sin(theta/2)[:, None]
+            w = np.cos(theta/2)[:, None]  
+
+            dq = np.hstack([w, xyz]) 
+
+            self.quaternions=self.quaternion_multiply(dq,self.quaternions)
             self.quaternions/=np.linalg.norm(self.quaternions, axis=1)[:, None]
             
             

@@ -69,7 +69,7 @@ if __name__ == "__main__":
     ogm=OGM()
     
     # particle filter
-    numberOfParticles=1
+    numberOfParticles=2
     pf=ParticleFilter(np.array([0,0,0]),ogm,numberOfParticles)    
     
     
@@ -97,22 +97,27 @@ if __name__ == "__main__":
             ya=imu_data["yaw"]
             
             
-            ogm.bressenham_mark_Cells(np.array(dists), np.array([x,y,yaw*np.pi/180]))
+            # ogm.bressenham_mark_Cells(np.array(dists), np.array([x,y,yaw*np.pi/180]))
             
-            pf.prediction_step(np.repeat(imu_lin_vel,pf.numberofparticles).reshape(pf.numberofparticles,2), np.repeat(imu_ang_vel,numberOfParticles).reshape(pf.numberofparticles,3),dt)
+            # pf.prediction_step(np.tile(imu_lin_vel, (pf.numberofparticles, 1)), np.tile(imu_ang_vel, (pf.numberofparticles, 1)), dt)
             
             if print_frequency.update_time():
                 robot_pose=np.array([x,y,yaw])
-                print(pf.particle_poses,"-",robot_pose,"-",pf.quaternions)
+                print("-----------")
+                print(pf.particle_poses,"-",robot_pose,"-")
+                # print(np.tile(imu_lin_vel, (pf.numberofparticles, 1)), np.tile(imu_ang_vel, (pf.numberofparticles, 1)))
                 sensor_pose = robot_pose + np.array([np.cos(robot_pose[2])*0.265 - np.sin(robot_pose[2])*0, np.sin(robot_pose[2])*0.265 + np.cos(robot_pose[2])*0, -math.pi/2])
                 pass # debugging statements
             
             if(simdex%40==0):
                 ogm.show_cv2()
             simdex+=1
+            
             if ctrl_time.update_time():
                 v, s = controller.navigate(x, y, yaw)    
+                ogm.bressenham_mark_Cells(np.array(dists), np.array([x,y,yaw*np.pi/180]))
             
+                pf.prediction_step(np.tile(imu_lin_vel, (pf.numberofparticles, 1)), np.tile(imu_ang_vel, (pf.numberofparticles, 1)), dt)
                 husky_kuka.act(v, s)
                 
                 sim.step() # Advance one time step in the sim
