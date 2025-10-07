@@ -74,7 +74,6 @@ class ParticleFilter:
         self.xt=pose
         
     def quaternion_multiply(self, q1, q0):
-
         w0,x0,y0,z0= q0[:,0],q0[:,1],q0[:,2],q0[:,3]
         w1,x1,y1,z1= q1[:,0],q1[:,1],q1[:,2],q1[:,3]
 
@@ -108,17 +107,21 @@ class ParticleFilter:
             noisy_linU=linU
             noisy_angU=angU
 
+            # linear changes
             dx=noisy_linU[:,0]*dt/10
             dy=noisy_linU[:,1]*dt/10
             
-            self.quaternions=0.5*dt*self.quaternion_multiply(self.quaternions,noisy_angU)
-            
+            # angular changes
+            self.quaternions+=0.5*dt*self.quaternion_multiply(self.quaternions,noisy_angU)
+            self.quaternions/=np.linalg.norm(self.quaternions)
+
             
             self.particle_poses[:,0]+=dx
             self.particle_poses[:,1]+=dy
             
             w,x,y,z=self.quaternions.T
             self.particle_poses[:,2]= np.arctan2(2*(w*z+x*y),1-2*(y*y+z*z))
+            
             
 
             

@@ -69,7 +69,7 @@ if __name__ == "__main__":
     ogm=OGM()
     
     # particle filter
-    numberOfParticles=2
+    numberOfParticles=1
     pf=ParticleFilter(np.array([0,0,0]),ogm,numberOfParticles)    
     
     
@@ -98,11 +98,12 @@ if __name__ == "__main__":
             
             
             ogm.bressenham_mark_Cells(np.array(dists), np.array([x,y,yaw*np.pi/180]))
+            
             pf.prediction_step(np.repeat(imu_lin_vel,pf.numberofparticles).reshape(pf.numberofparticles,2), np.repeat(imu_ang_vel,numberOfParticles).reshape(pf.numberofparticles,4),dt)
             
             if print_frequency.update_time():
                 robot_pose=np.array([x,y,yaw])
-                print(pf.particle_poses,robot_pose)
+                print(pf.particle_poses,"-",robot_pose,"-",pf.quaternions)
                 sensor_pose = robot_pose + np.array([np.cos(robot_pose[2])*0.265 - np.sin(robot_pose[2])*0, np.sin(robot_pose[2])*0.265 + np.cos(robot_pose[2])*0, -math.pi/2])
                 pass # debugging statements
             
