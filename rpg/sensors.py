@@ -583,7 +583,7 @@ class IMU(Sensor):
         self.bg = np.zeros(3)  # Gyroscope bias
         self.ba = np.zeros(3)  # Accelerometer bias
         self.ng_std = np.zeros(3)  # Gyroscope noise standard deviation
-        self.na_std = np.zeros(3)  # Accelerometer noise standard deviation
+        self.na_std =np.array([0.3,0.3,0.3])  # Accelerometer noise standard deviation
 
         # Store previous linear velocity for acceleration calculation
         self.prev_linear_velocity = np.zeros(3)
@@ -613,7 +613,6 @@ class IMU(Sensor):
         pos, orn = p.getBasePositionAndOrientation(self.car_id)
         linear_velocity = np.array(linear_velocity)
         angular_velocity = np.array(angular_velocity)
-        # angular_velocity=np.insert(angular_velocity,0,0.0)
         
 
         orn_mat = np.array(p.getMatrixFromQuaternion(orn)).reshape(3, 3)
@@ -625,7 +624,6 @@ class IMU(Sensor):
         # Add biases and noise
         gravity = np.array([0, 0, -9.81])
         z_alpha = np.dot(orn_mat.T, (linear_acceleration - gravity)) + self.ba + np.random.randn(3) * self.na_std
-
         
         pos, orn = p.getBasePositionAndOrientation(self.car_id)
         roll, pitch, yaw = p.getEulerFromQuaternion(orn)

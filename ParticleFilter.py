@@ -208,6 +208,7 @@ class ParticleFilter:
         
 
         weighted_pose[2]=np.degrees(weighted_pose[2])
+        weighted_pose[1]=-weighted_pose[1]
         
         return weighted_pose
     
