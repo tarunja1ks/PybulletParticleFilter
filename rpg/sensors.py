@@ -582,7 +582,7 @@ class IMU(Sensor):
         # Initialize biases and noise standard deviations
         self.bg = np.zeros(3)  # Gyroscope bias
         self.ba = np.zeros(3)  # Accelerometer bias
-        self.ng_std = np.zeros(3)  # Gyroscope noise standard deviation
+        self.ng_std =np.array([0.01,0.01,0.1]) # Gyroscope noise standard deviation
         self.na_std =np.array([0.05,0.05,0.2])  # Accelerometer noise standard deviation
 
         # Store previous linear velocity for acceleration calculation
@@ -619,7 +619,7 @@ class IMU(Sensor):
         
         # Calculate linear acceleration
         linear_acceleration = (linear_velocity - self.prev_linear_velocity) / dt
-        self.prev_linear_velocity = linear_velocity
+        self.prev_linear_velocity = linear_velocity+ np.random.randn(3) * self.ng_std
 
         # Add biases and noise
         gravity = np.array([0, 0, -9.81])
