@@ -111,16 +111,22 @@ class ParticleFilter:
             dx=noisy_linU[:,0]*dt/10
             dy=noisy_linU[:,1]*dt/10
             
-            # angular changes
-            self.quaternions+=0.5*dt*self.quaternion_multiply(self.quaternions,noisy_angU)
-            self.quaternions/=np.linalg.norm(self.quaternions)
+            theta =np.linalg.norm(noisy_angU, axis=1)*dt/10 # calculating the theta 
+            axis = noisy_angU / np.linalg.norm(noisy_angU, axis=1)[:, None]
+            axis = np.nan_to_num(axis)
+            dq=np.hstack([np.cos(theta/2)[:, None], axis * np.sin(theta/2)[:, None]])
+
+            self.quaternions=self.quaternion_multiply(self.quaternions,dq)
+            self.quaternions/=np.linalg.norm(self.quaternions, axis=1)[:, None]
+            
+            
 
             
             self.particle_poses[:,0]+=dx
             self.particle_poses[:,1]+=dy
             
             w,x,y,z=self.quaternions.T
-            self.particle_poses[:,2]= np.arctan2(2*(w*z+x*y),1-2*(y*y+z*z))
+            self.particle_poses[:,2]= np.degrees(np.arctan2(2*(w*z+x*y),1-2*(y*y+z*z)))
             
             
 

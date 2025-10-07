@@ -613,7 +613,7 @@ class IMU(Sensor):
         pos, orn = p.getBasePositionAndOrientation(self.car_id)
         linear_velocity = np.array(linear_velocity)
         angular_velocity = np.array(angular_velocity)
-        angular_velocity=np.insert(angular_velocity,0,0.0)
+        # angular_velocity=np.insert(angular_velocity,0,0.0)
         
 
         orn_mat = np.array(p.getMatrixFromQuaternion(orn)).reshape(3, 3)
