@@ -69,11 +69,13 @@ if __name__ == "__main__":
     ogm=OGM()
     
     # particle filter
-    numberOfParticles=2
+    numberOfParticles=100
     pf=ParticleFilter(np.array([0,0,0]),ogm,numberOfParticles)    
     
     
     simdex=0
+    
+    estimaed_pose=[0,0,0]
     
     while True:
         try:
@@ -104,9 +106,7 @@ if __name__ == "__main__":
             if print_frequency.update_time():
                 robot_pose=np.array([x,y,yaw])
                 print("-----------")
-                print(pf.particle_poses,"-",robot_pose,"-")
-                # print(np.tile(imu_lin_vel, (pf.numberofparticles, 1)), np.tile(imu_ang_vel, (pf.numberofparticles, 1)))
-                sensor_pose = robot_pose + np.array([np.cos(robot_pose[2])*0.265 - np.sin(robot_pose[2])*0, np.sin(robot_pose[2])*0.265 + np.cos(robot_pose[2])*0, -math.pi/2])
+                print(estimaed_pose,"-",robot_pose,"-")
                 pass # debugging statements
             
             if(simdex%40==0):
@@ -121,9 +121,7 @@ if __name__ == "__main__":
             
                 pf.prediction_step(np.tile(imu_lin_vel, (pf.numberofparticles, 1)), np.tile(imu_ang_vel, (pf.numberofparticles, 1)), dt)
                 
-                pf.update_step(ogm,np.array(dists),40)
-                
-
+                estimaed_pose=pf.update_step(ogm,np.array(dists),40)
                 
                 husky_kuka.act(v, s)
                 

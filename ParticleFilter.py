@@ -129,7 +129,7 @@ class ParticleFilter:
             self.particle_poses[:,1]+=dy
             
             w,x,y,z=self.quaternions.T
-            self.particle_poses[:,2]= np.degrees(np.arctan2(2*(w*z+x*y),1-2*(y*y+z*z)))
+            self.particle_poses[:,2]= np.arctan2(2*(w*z+x*y),1-2*(y*y+z*z))
             
             
 
@@ -207,7 +207,7 @@ class ParticleFilter:
         weighted_pose=np.array([weighted_x, weighted_y, weighted_angle])
         
 
-        
+        weighted_pose[2]=np.degrees(weighted_pose[2])
         
         return weighted_pose
     
