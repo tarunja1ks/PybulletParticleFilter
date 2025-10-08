@@ -34,11 +34,11 @@ class ParticleFilter:
         self.quaternions=np.repeat(np.array([[1.0, 0.0, 0.0, 0.0]]),self.numberofparticles, axis=0)
         
         self.NumberEffective=numberofparticles
-        self.sigma_x=0.03 # the stdev for lin vel
-        self.sigma_y=0.03 # the stdev for ang vel 
+        self.sigma_x=0.01 # the stdev for lin vel
+        self.sigma_y=0.01 # the stdev for ang vel 
         self.sigma_roll=0.000
         self.sigma_pitch=0.000
-        self.sigma_yaw=0.000001
+        self.sigma_yaw=0.01
         self.lidar_stdev=0.01
         
         self.lin_covariance=np.asarray([[self.sigma_x**2,0],[0,self.sigma_y**2]])
