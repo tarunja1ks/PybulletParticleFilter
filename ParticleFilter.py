@@ -18,59 +18,56 @@ import warnings
 import torch
 
 # matplotlib.use('TkAgg')
-
-
-
-
-
 class ParticleFilter:
     def __init__(self, initial_pose, OGM, numberofparticles=3):
-        dataset=20
-        self.numberofparticles=numberofparticles
-        self.q=np.array([1.0, 0.0, 0.0, 0.0])
-        self.particle_poses= np.tile(initial_pose, (self.numberofparticles, 1)).astype(np.float64)
-        self.particle_weights= np.ones(self.numberofparticles)/self.numberofparticles
-        
-        self.quaternions=np.repeat(np.array([[1.0, 0.0, 0.0, 0.0]]),self.numberofparticles, axis=0)
-        
-        self.NumberEffective=numberofparticles
-        self.sigma_x=0.01 # the stdev for lin vel
-        self.sigma_y=0.01 # the stdev for ang vel 
-        self.sigma_roll=0.000
-        self.sigma_pitch=0.000
-        self.sigma_yaw=0.01
-        self.lidar_stdev=0.01
-        
-        self.lin_covariance=np.asarray([[self.sigma_x**2,0],[0,self.sigma_y**2]])
-        self.ang_covariance=np.zeros((3, 3))
-        self.ang_covariance[0,0]=self.sigma_roll**2
-        self.ang_covariance[1,1]=self.sigma_pitch**2
-        self.ang_covariance[2,2]=self.sigma_yaw**2
-        
-        
-        self.xt=initial_pose
+        # dataset=20
+        self.numberofparticles = numberofparticles
+        self.particle_poses = np.tile(initial_pose, (self.numberofparticles, 1)).astype(np.float64)
+        self.particle_weights = np.ones(self.numberofparticles)/self.numberofparticles
+        self.q = np.array([1.0, 0.0, 0.0, 0.0])
 
-        self.prev_ang=0
-        self.robotTosensor= np.array([OGM.sensor_x_r, OGM.sensor_y_r, OGM.sensor_yaw_r])
-        self.device = torch.device('mps') # using gpu
+        self.quaternions = np.repeat(np.array([[1.0, 0.0, 0.0, 0.0]]), self.numberofparticles, axis=0)
 
+        self.NumberEffective = numberofparticles
+
+        # init stddevs and covariances
+        self._init_stddevs(0.03, 0.03, 0.000, 0.000, 0.000001, 0.01)
+        self._init_covariances()
+
+        self.xt = initial_pose
+        self.prev_ang = 0
+        self.robotTosensor = np.array([OGM.sensor_x_r, OGM.sensor_y_r, OGM.sensor_yaw_r])
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu')
         
-        
-    def normal_pdf(self,x, mu, sigma):
+    def _init_stddevs(self, sigma_x, sigma_y, sigma_roll, sigma_pitch, sigma_yaw, lidar_stdev):
+        self.sigma_x = sigma_x  # the stdev for lin vel
+        self.sigma_y = sigma_y  # the stdev for ang vel
+        self.sigma_roll = sigma_roll
+        self.sigma_pitch = sigma_pitch
+        self.sigma_yaw = sigma_yaw
+        self.lidar_stdev = lidar_stdev
+
+    def _init_covariances(self):
+        self.lin_covariance = np.asarray([[self.sigma_x**2, 0], [0, self.sigma_y**2]])
+        self.ang_covariance = np.zeros((3, 3))
+        self.ang_covariance[0, 0] = self.sigma_roll**2
+        self.ang_covariance[1, 1] = self.sigma_pitch**2
+        self.ang_covariance[2, 2] = self.sigma_yaw**2
+
+    def normal_pdf(self, x, mu, sigma):
         return np.exp(-0.5*((x - mu)/sigma)**2) / (sigma * np.sqrt(2*np.pi))
     
     def normal_cdf(self, x, mu, sigma):
         z=(x - mu) / (sigma * np.sqrt(2))
         return 0.5 * (1 + erf(z))
 
-
-        
     def getPose(self):
         return self.xt.getPose()
+
     def getPoseObject(self):
         return self.xt
     
-    def setPose(self,pose):
+    def setPose(self, pose):
         self.xt=pose
         
     def quaternion_multiply(self, q1, q0):
@@ -89,8 +86,6 @@ class ParticleFilter:
         output /= norms
 
         return output
-        
-        
         
     def testang(self,vel,dt):
         self.q+=0.5*dt*self.quaternion_multiply(self.q,vel)
@@ -177,7 +172,6 @@ class ParticleFilter:
         first_occupied=torch.argmax(occupied.long(), dim=2)
         no_obstacle=~torch.any(occupied, dim=2)
         first_occupied[no_obstacle]=max_cell_range - 1
-        
 
         particle_idx, ray_idx=torch.meshgrid(torch.arange(first_occupied.shape[0]), torch.arange(first_occupied.shape[1]), indexing='ij')
         x_hits=x_cells[particle_idx, ray_idx, first_occupied].float()
@@ -186,7 +180,6 @@ class ParticleFilter:
         ztk_star=(((y_hits-cell_sensor_y[:,None])**2+(x_hits-cell_sensor_x[:,None])**2)**0.5)/20
         
         ztk=ranges.reshape(1, -1)
-        
         
         log_likelihood=-0.5 * ((ztk - ztk_star) / self.lidar_stdev)**2
         log_weights=torch.sum(log_likelihood, dim=1)
@@ -221,20 +214,3 @@ class ParticleFilter:
             indices= np.searchsorted(cumsum, sample_points)
             self.particle_poses= self.particle_poses[indices]
             self.particle_weights= np.full(self.numberofparticles, 1.0 / self.numberofparticles)
-
-    
-    
-
-
-
-
-
-
-    
-
-
-
-    
-
-
-
