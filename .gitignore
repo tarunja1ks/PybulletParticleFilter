@@ -1,0 +1,13 @@
+.vscode/
+**/__pycache__/
+*.pyc/
+
+# Virtual environment
+.venv/
+bin/
+etc/
+lib/
+lib64
+include/
+share/
+
