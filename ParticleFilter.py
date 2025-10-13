@@ -25,7 +25,6 @@ import torch
 
 class ParticleFilter:
     def __init__(self, initial_pose, OGM, numberofparticles=3):
-        dataset=20
         self.numberofparticles=numberofparticles
         self.q=np.array([1.0, 0.0, 0.0, 0.0])
         self.particle_poses= np.tile(initial_pose, (self.numberofparticles, 1)).astype(np.float64)
