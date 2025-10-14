@@ -98,14 +98,9 @@ if __name__ == "__main__":
             dt=imu_data["dt"]
             ya=imu_data["yaw"]
             
-            
-            # ogm.bressenham_mark_Cells(np.array(dists), np.array([x,y,yaw*np.pi/180]))
-            
-            # pf.prediction_step(np.tile(imu_lin_vel, (pf.numberofparticles, 1)), np.tile(imu_ang_vel, (pf.numberofparticles, 1)), dt)
-            
+         
             if print_frequency.update_time():
                 robot_pose=np.array([x,y,yaw])
-                print("-----------")
                 print(estimated_pose,"-",robot_pose,"-")
                 pass # debugging statements
             
