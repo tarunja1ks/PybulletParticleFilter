@@ -241,6 +241,13 @@ class ParticleFilter:
         return weighted_pose
     
     def resampling_step(self):
+        """
+        Perform resampling of particles based on their weights.
+        
+        Uses systematic resampling when the effective number of particles
+        falls below 30% of the total number of particles.
+        """
+        
         # calculating the number of effective particles
         self.NumberEffective= 1/np.sum(self.particle_weights**2)
         if self.NumberEffective<=self.numberofparticles * 0.3:
