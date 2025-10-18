@@ -29,7 +29,7 @@ class OGM:
         extent= [self.MAP['ymin'], self.MAP['ymax'], self.MAP['xmin'], self.MAP['xmax']]
         
         
-        self.sensor_x_r= 0.265
+        self.sensor_x_r= 0.265 
         self.sensor_y_r= 0.0
         self.sensor_yaw_r= -math.pi/2
         
@@ -168,7 +168,7 @@ class OGM:
         else:
             odds= (1 - confidence) / confidence
         self.MAP['map'][x][y] += (math.log(odds))*scale
-        self.MAP['map'][x][y]= max(-bound, min(bound, self.MAP['map'][x][y]))
+        self.MAP['map'][x][y]= max(-bound, min(bound, self.MAP['map'][x][y])) # clipping it within bounds
     
     def ogm_plot_vectorized(self, x, y, occupied=False, scale=1, bound=10): # plotting a numerous points on the OGM
         if (x.min() < 0 or x.max() >= self.MAP['sizex'] or y.min() < 0 or y.max() >= self.MAP['sizey']):
@@ -183,7 +183,7 @@ class OGM:
         
         self.MAP['map'][x,y]= np.clip(self.MAP['map'][x,y]+(math.log(odds))*scale ,-bound,bound) # clipping each thing between bounds after adding log odds
         
-        
+    # ogm calculation of logodds
     def logOddstoProbability(self,logOdds):
         return 1 / (1 + math.exp(-logOdds))
     def probabilityToLogOdds(self,probability):
@@ -196,8 +196,9 @@ class OGM:
             robot_pose[2] + self.sensor_yaw_r
         ])
        
-        freeInd=(scan >= self.lidar_range_min)&(scan <= self.lidar_range_max)
+        freeInd=(scan >= self.lidar_range_min)&(scan <= self.lidar_range_max) # obtaining the free indices from the rays
         
+        # calculating the hitpoint where the lidar beam stops(ex,ey) and the start points)sx,sy)
         world_angles=self.angles[freeInd]-sensor_pose[2]+np.pi
         ex=np.cos(world_angles)*scan[freeInd]+sensor_pose[0]
         ey=np.sin(world_angles)*scan[freeInd]+sensor_pose[1]
@@ -210,20 +211,20 @@ class OGM:
         sy=np.repeat(sy,np.sum(freeInd))
         
         
-        xcells,ycells=util.bresenham2D_vectorized(sx,sy,ex,ey)
+        xcells,ycells=util.bresenham2D_vectorized(sx,sy,ex,ey) # finding the x and y cells along the ray from the lidar sensor to the wall/obstacle
         
         
-        self.ogm_plot_vectorized(xcells[:-1], ycells[:-1], False)
+        self.ogm_plot_vectorized(xcells[:-1], ycells[:-1], False) # plotting all the cells the lidar beam passes through in the scan on the OGM
         
         
-        occInd=(scan >= self.lidar_range_min)&(scan < self.lidar_range_max)
+        occInd=(scan >= self.lidar_range_min)&(scan < self.lidar_range_max) #checking for angles where it returns ranges before the max_range of the lidar 
 
-        if(np.sum(occInd)>0):
+        if(np.sum(occInd)>0): # checking for if there is a hitpoint or not
             world_angles=self.angles[occInd]-sensor_pose[2]+np.pi
             ex=np.cos(world_angles)*scan[occInd]+sensor_pose[0]
             ey=np.sin(world_angles)*scan[occInd]+sensor_pose[1]
             ex,ey=self.vector_meter_to_cell(np.array([ex, ey]))  
-            self.ogm_plot_vectorized(ex, ey, True)
+            self.ogm_plot_vectorized(ex, ey, True) # plotting end cell as occupied
         
         
         
