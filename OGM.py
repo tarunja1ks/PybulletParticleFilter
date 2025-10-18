@@ -26,11 +26,7 @@ class OGM:
         
         self.red_dot_markers = [] 
         
-        # fig2= plt.figure(figsize=(10, 10))
         extent= [self.MAP['ymin'], self.MAP['ymax'], self.MAP['xmin'], self.MAP['xmax']]
-        # self.ogm_map= plt.imshow(self.MAP['map'], cmap="gray", vmin=-5, vmax=5, 
-        #                          origin='lower', extent=extent)
-
         
         
         self.sensor_x_r= 0.265
@@ -93,7 +89,7 @@ class OGM:
         return expanded
             
     def meter_to_cell(self, pose_vector):
-        
+        # converting pose_vector from meters into cell coordinates
         x= pose_vector[0]
         
         y= pose_vector[1]
@@ -112,7 +108,7 @@ class OGM:
         return cell_x, cell_y
     
     def vector_meter_to_cell(self, pose_vector):
-        
+        # converting numerous positions possibly a ray from meters into cell coordinates
         x= pose_vector[0]
         
         y= pose_vector[1]
@@ -144,7 +140,7 @@ class OGM:
         cv2.imshow("Occupancy Grid Map", img_resized)
         cv2.waitKey(1)  # non-blocking
     
-    def plot_red_dot(self, cell_x, cell_y):
+    def plot_red_dot(self, cell_x, cell_y): # ability to plot a red dot on the OGM MAP
         # Convert cell coordinates back to world coordinates
         world_x = self.MAP['xmin'] + cell_x * self.MAP['res']
         world_y = self.MAP['ymin'] + cell_y * self.MAP['res']
@@ -163,7 +159,7 @@ class OGM:
         # plt.pause(0.01)
             
         
-    def ogm_plot(self, x, y, occupied=False, scale=1, bound=10):
+    def ogm_plot(self, x, y, occupied=False, scale=1, bound=10): # plotting a single point on the OGM
         if not (0 <= x < self.MAP['sizex'] and 0 <= y < self.MAP['sizey']):
             return
         confidence= 0.95 # confidence level of the sensor
@@ -174,7 +170,7 @@ class OGM:
         self.MAP['map'][x][y] += (math.log(odds))*scale
         self.MAP['map'][x][y]= max(-bound, min(bound, self.MAP['map'][x][y]))
     
-    def ogm_plot_vectorized(self, x, y, occupied=False, scale=1, bound=10):
+    def ogm_plot_vectorized(self, x, y, occupied=False, scale=1, bound=10): # plotting a numerous points on the OGM
         if (x.min() < 0 or x.max() >= self.MAP['sizex'] or y.min() < 0 or y.max() >= self.MAP['sizey']):
             return
         
@@ -193,9 +189,7 @@ class OGM:
     def probabilityToLogOdds(self,probability):
         return math.log(probability/(1-probability))
     
-    def bressenham_mark_Cells(self, scan, robot_pose):
-        
-        
+    def bressenham_mark_Cells(self, scan, robot_pose): # marking numerous cells with the bressenham along a ray and plotting them in the ogm
         sensor_pose = np.array([
             robot_pose[0] + np.cos(robot_pose[2]) * self.sensor_x_r - np.sin(robot_pose[2]) * self.sensor_y_r,
             robot_pose[1] + np.sin(robot_pose[2]) * self.sensor_x_r + np.cos(robot_pose[2]) * self.sensor_y_r,
@@ -276,18 +270,10 @@ class OGM:
         plt.ylim(self.MAP['xmin'], self.MAP['xmax'])
         
         plt.pause(0.05)
-        
-        
-        
-        
-
-        
-       
 
     def showPlots(self):
         plt.show()
     
-    # def mapCorrelation(): # making it again to understand it more 
         
     def updatePlot(self, robot_pose=None):
         # Check if map was expanded and recreate imshow if needed

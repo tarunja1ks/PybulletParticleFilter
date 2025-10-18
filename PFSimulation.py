@@ -10,7 +10,6 @@ from algorithms.Control.Controller import KeyboardController
 from utilities.timings import Timings
 from OGM import OGM
 from ParticleFilter import ParticleFilter
-from plot import MultiLinePlot
 import numpy as np
 import pybullet as p
 import math
