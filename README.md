@@ -6,12 +6,12 @@ This repository implements a Particle Filter for robot localization in a PyBulle
 
 ## Key Files:
 
-├── PfSimulation.py         Main simulation loop entry point<br>
-├── ParticleFilter.py       Core particle filter logic<br>
-├── OGM.py                  Probabilistic Occupancy Grid Map class<br>
-├── utils.py                Raycasting and helper utilities<br>
-├── requirements.txt        Python dependencies<br>
-└── README.md               Project documentation<br>
+PfSimulation.py:         Main simulation loop entry point<br>
+ParticleFilter.py:       Core particle filter logic<br>
+OGM.py:                 Probabilistic Occupancy Grid Map class<br>
+utils.py:                Raycasting and helper utilities<br>
+requirements.txt:        Python dependencies<br>
+README.md:              Project documentation<br>
 
 ## Installing Dependencies
 To install the necessary libraries, run the command below in your terminal after cloning the repository: 
