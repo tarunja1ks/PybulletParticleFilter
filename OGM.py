@@ -16,10 +16,10 @@ class OGM:
         # init MAP
         self.MAP= {}
         self.MAP['res']  = 0.05 #meters
-        self.MAP['xmin'] = -25  #meters
-        self.MAP['ymin'] = -25
-        self.MAP['xmax'] =  25
-        self.MAP['ymax'] =  25 
+        self.MAP['xmin'] = -15  #meters
+        self.MAP['ymin'] = -15
+        self.MAP['xmax'] =  15
+        self.MAP['ymax'] =  15 
         self.MAP['sizex'] = int(np.ceil((self.MAP['xmax'] - self.MAP['xmin']) / self.MAP['res'] + 1)) #cells
         self.MAP['sizey'] = int(np.ceil((self.MAP['ymax'] - self.MAP['ymin']) / self.MAP['res'] + 1))
         self.MAP['map']= np.zeros((self.MAP['sizex'],self.MAP['sizey']),dtype=np.float32) #DATA TYPE: char or int8

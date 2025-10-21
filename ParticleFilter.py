@@ -17,7 +17,7 @@ import multiprocessing.resource_tracker as rt
 import warnings
 import torch
 
-# matplotlib.use('TkAgg')
+matplotlib.use('TkAgg')
 """
 Particle Filter implementation for robot localization using LIDAR data.
 
@@ -239,6 +239,7 @@ class ParticleFilter:
         weighted_pose[1]=-weighted_pose[1]
         
         return weighted_pose
+    
     
     def resampling_step(self):
         """
