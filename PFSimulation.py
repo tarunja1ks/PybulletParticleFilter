@@ -120,7 +120,7 @@ if __name__ == "__main__":
                 
                 # performing particle filter to track and estimate pose for robot
                 pf.prediction_step(np.tile(imu_lin_vel, (pf.numberofparticles, 1)), np.tile(imu_ang_vel, (pf.numberofparticles, 1)), dt)            
-                estimated_pose=pf.update_step(ogm,np.array(dists)**np.cos(imu_data["pitch"]),40)
+                estimated_pose=pf.update_step(ogm,np.array(dists)*np.cos(imu_data["pitch"]),40)
                 
                 # perform keyboard inputs onto the robot
                 husky_kuka.act(v, s)
