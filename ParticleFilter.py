@@ -17,7 +17,6 @@ import multiprocessing.resource_tracker as rt
 import warnings
 import torch
 
-matplotlib.use('TkAgg')
 """
 Particle Filter implementation for robot localization using LIDAR data.
 

@@ -13,6 +13,7 @@ utils.py:                Raycasting and helper utilities<br>
 requirements.txt:        Python dependencies<br>
 README.md:              Project documentation<br>
 
+
 ## Installing Dependencies
 To install the necessary libraries, run the command below in your terminal after cloning the repository: 
 ```bash
